@@ -4,12 +4,21 @@ A cookie-cutter builder for LangGraph-style Claude Code plugins: stdlib-only sta
 execution where routing is enforced by deterministic code, not by prose instructions Claude
 may or may not follow.
 
-Two commands ship here:
+Three commands ship here — two that build, one that demonstrates:
 
-- **`/build-graph`** — the generator. Interrogates you for a complete graph spec, then
-  scaffolds and fills in a real plugin on top of this engine.
+- **`/graph-spec`** — interrogates you for the plan and writes it to
+  `<name>.graph-spec.md`. Plan only, no code. The file is reviewable and hand-editable
+  before anything is generated.
+- **`/build-graph`** — implements a spec: scaffolds the engine, writes the domain logic,
+  verifies. Runs `/graph-spec` first if no spec exists. Where a node warrants it, also
+  generates a dedicated subagent, a skill, or `.mcp.json` config from `templates/` —
+  optional and per node, not emitted by default.
 - **`/teacher`** — the worked example that proves the pattern end to end, and the code you'd
   copy by hand if you'd rather not use the generator.
+
+Splitting spec from build is deliberate: "is this spec complete?" is a fuzzy bound, and
+leaving the implementation steps visible right behind it is exactly what makes an agent rush
+it. The spec file is the hand-off that removes the pull.
 
 ## Structure
 
@@ -21,12 +30,16 @@ claudegraph/
 ├── .claude-plugin/
 │   └── plugin.json           # manifest (required)
 ├── commands/
-│   ├── build-graph.md        # /build-graph — GENERATOR: interrogates for the graph spec,
-│   │                          #   scaffolds, then fills in the new plugin's domain logic
+│   ├── graph-spec.md         # /graph-spec — PLAN: interrogate, write <name>.graph-spec.md
+│   ├── build-graph.md        # /build-graph — IMPLEMENT: scaffold, write domain logic, verify
 │   └── teacher.md            # /teacher — EXAMPLE: literal, numbered procedure calling the script
 ├── references/
-│   └── graph-spec.md         # field schema the interrogation fills, worked example,
-│                              #   and how each field maps to code (read by /build-graph)
+│   └── graph-spec.md         # field schema the interrogation fills, worked example, how each
+│                              #   field maps to code, and when a node warrants an attachment
+├── templates/                # adapted by /build-graph into the generated plugin, per node,
+│   ├── agent.md               #   only when the graph-spec rules flag that node — a subagent
+│   ├── skill.md               #   for isolated/noisy work, a skill for reused domain knowledge,
+│   └── .mcp.json              #   an MCP entry for reaching an external system
 ├── scripts/
 │   ├── graph.py               # generic engine: NodeKind, NodeMeta, State, Graph
 │   │                          #   (add_node/add_edge/add_conditional_edge/step/node_meta),

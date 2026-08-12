@@ -1,0 +1,25 @@
+{
+  "_comment": "Template. Delete this key. One entry per external system a node needs. IMPORTANT: this only declares how to START a server the user must already have installed — scaffolding this config does not make the server exist, and a wrong command here fails at plugin load, not at scaffold time. Verify the command runs before shipping.",
+
+  "mcpServers": {
+    "<server-name>": {
+      "command": "<executable, e.g. npx or uvx or node>",
+      "args": ["<package-or-script>", "<flags>"],
+      "env": {
+        "<VAR_NAME>": "${<VAR_NAME>}"
+      }
+    },
+
+    "_example-postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"],
+      "env": {}
+    },
+
+    "_example-local-script": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/my_mcp_server.py"],
+      "env": {}
+    }
+  }
+}

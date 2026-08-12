@@ -9,10 +9,12 @@ next, and Claude generates the content for whatever node it's told it's on.
 
 ## What's in here
 
-- **`claudegraph/`** — the plugin. Two commands, deliberately:
-  - **`/build-graph`** — the generator. Interrogates you for a complete graph spec (per node:
-    kind, goal, tools, expected output, logging; per edge: exact conditions and destinations;
-    per loop: trigger and termination), then scaffolds and fills in a working plugin.
+- **`claudegraph/`** — the plugin. Three commands, deliberately:
+  - **`/graph-spec`** — interrogates you for the plan (per node: kind, goal, tools, expected
+    output, logging; per edge: exact conditions and destinations; per loop: trigger and
+    termination) and writes it to a reviewable, hand-editable spec file. No code.
+  - **`/build-graph`** — implements that spec: scaffolds, writes the domain logic, verifies.
+    Generates a subagent, skill, or MCP config for a node only when that node warrants one.
   - **`/teacher`** — the example run that proves the pattern end to end.
   - **`scripts/graph.py` + `scripts/skill_runner.py`** — the engine underneath both. Nodes,
     edges, conditional edges, a step budget, checkpointing, and an append-only evidence log.

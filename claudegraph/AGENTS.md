@@ -2,11 +2,11 @@
 
 Cookie-cutter builder for LangGraph-style Claude Code plugins: a stdlib-only
 routing engine (`scripts/graph.py` + `scripts/skill_runner.py`), a generator
-command (`/build-graph`, backed by `scripts/scaffold_plugin.py` and
-`references/graph-spec.md`) that interrogates for a graph spec and produces real
-plugins from it, and one worked example command (`/teacher`, backed by
-`scripts/template_skill.py`) that both proves the pattern and serves as the
-hand-copy starting point. Full rationale lives in
+pair of generator commands — `/graph-spec` (interrogate, write a spec file) and
+`/build-graph` (implement it, backed by `scripts/scaffold_plugin.py`,
+`references/graph-spec.md`, and `templates/`) — and one worked example command
+(`/teacher`, backed by `scripts/template_skill.py`) that both proves the pattern
+and serves as the hand-copy starting point. Full rationale lives in
 `README.md` (structure/install/customize), `ROADMAP.md` (ideas considered and
 deliberately deferred, with why), and `LEARNING_CHECKLIST.md` (the design
 decisions behind the current shape). Read those before re-deriving anything
@@ -14,14 +14,18 @@ they already answer.
 
 ## Adding a skill or feature
 
-- New plugin built on this engine: use `/build-graph` — it interrogates for the
-  full graph spec first, which is the step that decides output quality.
-  Hand-copying `scripts/template_skill.py` per `README.md`'s Customize section
-  is the fallback, not the default.
-- Two commands only, by design: `/build-graph` (generator) and `/teacher`
-  (example). A third command needs a reason that isn't "it seemed useful" —
-  and generated plugins must never inherit `/build-graph` (see
-  `EXCLUDE_RELPATHS` in `scripts/scaffold_plugin.py`).
+- New plugin built on this engine: use `/graph-spec` then `/build-graph`. The
+  spec step decides output quality; keep it a separate turn producing a real
+  file, never folded into implementation. Hand-copying
+  `scripts/template_skill.py` per `README.md`'s Customize section is the
+  fallback, not the default.
+- Three commands, by design: `/graph-spec` (plan), `/build-graph` (implement),
+  `/teacher` (example). A fourth needs a reason that isn't "it seemed useful",
+  and generated plugins must never inherit the generator's commands, templates,
+  or references (see `EXCLUDE_RELPATHS` in `scripts/scaffold_plugin.py`).
+- Agent/skill/MCP attachments are opt-in per node against the rules in
+  `references/graph-spec.md`. A generated plugin where every node has all three
+  is a failure of that judgment, not thoroughness.
 - New skill inside this plugin: copy `scripts/template_skill.py`, follow
   `README.md`'s Customize section. Never edit `graph.py`/`skill_runner.py` to
   fit one skill's needs — they're skill-agnostic on purpose.

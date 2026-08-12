@@ -10,9 +10,43 @@ Nothing here is invented by the agent — every value comes from the user's answ
 | `name` | yes | `add_node("<name>", ...)`, node names in edges/tests/command file | snake_case, one word if possible — it's grepped end-to-end |
 | `kind` | yes | `kind=NodeKind.TASK / HUMAN_GATE / END` | `human_gate` means the command file must stop and wait for a human answer before the next script call |
 | `goal` | yes | `goal="..."` — surfaced in the script's stdout, read by the command file | one imperative line; this is what Claude actually generates at that node |
-| `agent` | yes | `agent="..."` | `claude-inline` (Claude generates it in-conversation) or a named subagent/tool the command file should dispatch to |
+| `agent` | yes | `agent="..."` | `claude-inline` (Claude generates it in-conversation) or a named subagent the command file should dispatch to — see "Node attachments" below |
 | `expected_output` | yes | keys the command file writes into `data` after the node runs | what downstream routers read; a node whose output nothing reads is a smell worth raising |
 | `log_fields` | no | extra keys merged into the `log_transition` event | defaults already cover from/to/data/retry_count/step_count — only add what's genuinely missing |
+| `skill` | no | a `skills/<name>/SKILL.md` in the generated plugin | only when the node needs reusable domain knowledge — see below |
+| `mcp_tools` | no | an entry in the generated plugin's `.mcp.json` | the external system(s) this node reads or writes |
+
+## Node attachments — agent / skill / MCP
+
+All three are **optional and per node**. The default (`agent: claude-inline`, no skill, no
+MCP) is correct for most nodes, and a plugin where every node has all three is a plugin
+that will be harder to read than the problem it solves. Templates to adapt live in
+`../templates/`.
+
+**Dedicated agent** (`templates/agent.md`) — warranted when the node's work would flood the
+main conversation or needs isolation:
+
+- long or exploratory work (searching a codebase, reading many files) whose intermediate
+  output the user doesn't need to see
+- work needing a restricted or different tool set
+- work that benefits from a cold context, e.g. an independent review that shouldn't inherit
+  the reasoning it's reviewing
+
+Not warranted for short generation — explaining a concept, asking a question, summarizing
+what's already in context. Inline is cheaper and keeps the conversation coherent. A
+subagent starts cold and re-derives context the conversation already holds.
+
+**Skill** (`templates/skill.md`) — warranted when several nodes (or several plugins) need
+the same domain knowledge, schema, or procedure. A skill used by exactly one node, adding
+nothing the node's `goal` doesn't already say, is that `goal` in disguise — don't create it.
+
+**MCP** (`templates/.mcp.json`) — warranted when a node must reach an external system
+(database, issue tracker, API) rather than reason about what's already in context.
+
+Scaffolding an MCP entry writes *configuration for a server the user must already have*.
+It does not install the server, and a wrong `command` surfaces as a plugin-load failure,
+not a scaffold error. Confirm with the user that the server exists and the command is
+right — and say plainly that this part is unverified until they run it.
 
 ## Edge fields
 
@@ -48,7 +82,8 @@ nodes:
   - name: gather_evidence
     kind: task
     goal: pull recent logs/metrics for the named service and summarize anomalies
-    agent: claude-inline
+    agent: gather-evidence-agent      # long, noisy search — isolate it from the conversation
+    mcp_tools: [grafana]              # needs metrics from an external system
     expected_output: data.evidence_summary (string)
   - name: confirm_with_human
     kind: human_gate

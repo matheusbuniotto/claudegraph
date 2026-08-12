@@ -36,8 +36,10 @@ EXCLUDE_SUFFIXES = (".log.jsonl", ".checkpoint.json", ".pyc")
 EXCLUDE_RELPATHS = {
     Path("scripts/scaffold_plugin.py"),
     Path("commands/build-graph.md"),
+    Path("commands/graph-spec.md"),
     Path("references/graph-spec.md"),
     Path("references"),
+    Path("templates"),
 }
 
 
