@@ -1,8 +1,13 @@
 # three-step-template
 
-Shareable Claude Code plugin scaffold. The `/teacher` command is a worked example of a
-small, stdlib-only, LangGraph-style state graph — enforced routing logic, not just
-prose instructions Claude may or may not follow. Copy this directory to start a new plugin.
+A cookie-cutter builder for LangGraph-style Claude Code plugins: stdlib-only state-graph
+execution where routing is enforced by deterministic code, not by prose instructions Claude
+may or may not follow.
+
+Two things ship here. **`skills/scaffold-graph-plugin/`** is the generator — it interrogates
+you for a complete graph spec, then produces a real plugin on top of this engine.
+**`/teacher`** is the worked example that proves the pattern end to end, and the file you'd
+copy by hand if you'd rather not use the generator.
 
 ## Structure
 
@@ -27,6 +32,11 @@ three-step-template/
 │   │                          #   SKILL_NAME, build_graph(), a router, and an on_transition
 │   │                          #   policy hook; everything else comes from skill_runner.py
 │   └── test_template_skill.py  # stdlib unittest, run: python3 -m unittest scripts.test_template_skill -v
+├── skills/
+│   └── scaffold-graph-plugin/ # meta-skill: generates a NEW plugin from this one — copies
+│       ├── SKILL.md            #   graph.py/skill_runner.py verbatim, renames the template
+│       └── scripts/            #   files, then guides filling in the new graph's domain logic
+│           └── scaffold_plugin.py
 ├── LEARNING_CHECKLIST.md     # design rationale from building this: problem / solution / context
 ├── ROADMAP.md                # ideas considered and deliberately deferred
 └── README.md

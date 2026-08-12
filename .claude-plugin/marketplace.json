@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "three-step-template",
-      "description": "Cookie-cutter plugin template: a single command that walks through three steps via a small state graph (KISS).",
+      "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
       "source": "./three-step-template"
     }
   ]

@@ -1,11 +1,11 @@
 {
   "name": "three-step-template",
   "version": "1.0.0",
-  "description": "Cookie-cutter plugin template: a single command that walks through three steps (KISS).",
+  "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
   "author": {
     "name": "Matheus Buniotto",
     "email": "matheus.buniotto@gmail.com"
   },
   "license": "MIT",
-  "keywords": ["template", "starter", "cookie-cutter"]
+  "keywords": ["template", "starter", "cookie-cutter", "langgraph", "state-graph", "scaffold"]
 }

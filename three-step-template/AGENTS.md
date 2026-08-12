@@ -1,8 +1,11 @@
 # AGENTS.md
 
-Claude Code plugin scaffold: a stdlib-only, LangGraph-style routing engine
-(`scripts/graph.py` + `scripts/skill_runner.py`) plus one worked example skill
-(`scripts/template_skill.py`) that any new skill copies. Full rationale lives in
+Cookie-cutter builder for LangGraph-style Claude Code plugins: a stdlib-only
+routing engine (`scripts/graph.py` + `scripts/skill_runner.py`), a generator
+skill (`skills/scaffold-graph-plugin/`) that interrogates for a graph spec and
+produces real plugins from it, and one worked example
+(`scripts/template_skill.py`) that both proves the pattern and serves as the
+hand-copy starting point. Full rationale lives in
 `README.md` (structure/install/customize), `ROADMAP.md` (ideas considered and
 deliberately deferred, with why), and `LEARNING_CHECKLIST.md` (the design
 decisions behind the current shape). Read those before re-deriving anything
@@ -10,9 +13,13 @@ they already answer.
 
 ## Adding a skill or feature
 
-- New skill: copy `scripts/template_skill.py`, follow `README.md`'s Customize
-  section. Never edit `graph.py`/`skill_runner.py` to fit one skill's needs —
-  they're skill-agnostic on purpose.
+- New plugin built on this engine: use `skills/scaffold-graph-plugin/` — it
+  interrogates for the full graph spec first, which is the step that decides
+  output quality. Hand-copying `scripts/template_skill.py` per `README.md`'s
+  Customize section is the fallback, not the default.
+- New skill inside this plugin: copy `scripts/template_skill.py`, follow
+  `README.md`'s Customize section. Never edit `graph.py`/`skill_runner.py` to
+  fit one skill's needs — they're skill-agnostic on purpose.
 - New engine capability (`graph.py`/`skill_runner.py`): add it once a real,
   proven caller needs it, not because it might be useful later. Every YAGNI
   call already made is logged in `ROADMAP.md` — check it before
