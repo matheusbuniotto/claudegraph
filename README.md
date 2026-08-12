@@ -2,7 +2,7 @@
 
 A Claude Code plugin for creating LangGraph-style plugins.
 
-Claude following a numbered list in a markdown command file is *advisory* — nothing stops it
+Claude following a numbered list in a markdown command file is *advisory*! Nothing stops it
 from skipping a step, merging two, or narrating work it never did. `claudegraph` moves the
 routing into deterministic, stdlib-only Python: a small state-graph engine decides what happens
 next, and Claude generates the content for whatever node it's told it's on.
