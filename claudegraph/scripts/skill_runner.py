@@ -88,6 +88,7 @@ def run_skill(
                 "next_node": next_node,
                 "kind": kind,
                 "goal": goal,
+                "banner": _banner(next_node, kind, goal, state),
                 "retry_count": state.retry_count,
                 "max_retries": state.max_retries,
                 "step_count": state.step_count,
@@ -95,3 +96,23 @@ def run_skill(
             }
         )
     )
+
+
+# Marker per node kind, so the user can see at a glance whether the graph is
+# working, waiting on them, or finished.
+_MARKERS = {"task": "▶", "human_gate": "⏸", "end": "■", "start": "▶"}
+
+
+def _banner(node: str, kind: str | None, goal: str | None, state: State) -> str:
+    """One preformatted line the command file prints verbatim.
+
+    Preformatted on purpose: asking Claude to compose a progress line each turn
+    invites drift in wording and in what gets omitted. Here the format is fixed
+    and the only instruction is "print this".
+    """
+    parts = [f"step {state.step_count}"]
+    if state.retry_count:
+        parts.append(f"retry {state.retry_count}/{state.max_retries}")
+    marker = _MARKERS.get(kind or "", "▶")
+    head = f"{marker} {node} ({', '.join(parts)})"
+    return f"{head} — {goal}" if goal else head

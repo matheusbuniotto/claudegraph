@@ -45,6 +45,39 @@ class TeacherSkillTests(unittest.TestCase):
         self.assertEqual(out["next_node"], "demonstrate")
         self.assertEqual(out["kind"], "task")
 
+    def test_banner_names_node_and_goal(self):
+        out = json.loads(self.run_skill({"current_node": "explain", "data": {}}).stdout)
+        banner = out["banner"]
+        self.assertIn("demonstrate", banner)  # the node about to run
+        self.assertIn(out["goal"], banner)  # why it's running
+        self.assertTrue(banner.startswith("▶"))  # task marker
+
+    def test_banner_marks_human_gate_and_end_differently(self):
+        gate = json.loads(
+            self.run_skill({"current_node": "demonstrate", "data": {}}).stdout
+        )
+        self.assertTrue(gate["banner"].startswith("⏸"), gate["banner"])
+
+        end = json.loads(
+            self.run_skill(
+                {"current_node": "check", "data": {"understood": True}}
+            ).stdout
+        )
+        self.assertTrue(end["banner"].startswith("■"), end["banner"])
+
+    def test_banner_shows_retry_count_only_when_retrying(self):
+        first = json.loads(
+            self.run_skill({"current_node": "explain", "data": {}}).stdout
+        )
+        self.assertNotIn("retry", first["banner"])
+
+        looped = json.loads(
+            self.run_skill(
+                {"current_node": "check", "data": {"understood": False}}
+            ).stdout
+        )
+        self.assertIn("retry 1/2", looped["banner"])
+
     def test_check_node_exposes_human_gate_kind(self):
         result = self.run_skill(
             {

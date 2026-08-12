@@ -46,8 +46,9 @@ claudegraph/
 │   │                          #   log_transition(), save_checkpoint()/load_checkpoint() —
 │   │                          #   knows nothing about teaching
 │   ├── skill_runner.py        # generic CLI driver: stdin/stdout JSON, boundary validation,
-│   │                          #   step-budget handling, checkpointing, evidence logging —
-│   │                          #   reused as-is by every skill, never edited per-skill
+│   │                          #   step-budget handling, checkpointing, evidence logging, and
+│   │                          #   the preformatted `banner` progress line — reused as-is by
+│   │                          #   every skill, never edited per-skill
 │   ├── scaffold_plugin.py     # the mechanical half of /build-graph: copies the engine
 │   │                          #   byte-identically, renames files, excludes generator machinery
 │   ├── template_skill.py       # THE TEMPLATE — copy this file for a new skill. Only defines
@@ -107,6 +108,23 @@ considered and explicitly deferred as a separate, future project. The `skill_run
 idea in `ROADMAP.md` — the difference: the driver boilerplate (stdin parsing, error handling,
 checkpoint/log wiring) was proven to be identical duplication across skills the moment a second
 skill's worth of scaffolding was written, not a hypothetical future need.
+
+## Visible progress
+
+Every call returns a preformatted `banner` the command file prints verbatim, so a run reads
+as a visible trace rather than undifferentiated prose:
+
+```
+▶ explain (step 1) — 3-5 sentence plain-language explanation
+▶ demonstrate (step 2) — one concrete example
+⏸ check (step 3) — ask one question, wait for the user's answer
+▶ explain (step 4, retry 1/2) — 3-5 sentence plain-language explanation
+■ end (step 6, retry 1/2) — wrap up
+```
+
+`▶` task, `⏸` waiting on you, `■` finished. Retry counts appear only once looping. The line
+is composed in `skill_runner.py`, not by Claude — asking for a progress line each turn invites
+drift in wording and in what gets dropped; the only instruction is "print this".
 
 ## Known limitations
 

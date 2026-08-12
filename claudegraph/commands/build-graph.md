@@ -44,7 +44,9 @@ Fill in from the spec:
 
 - `scripts/<name>_skill.py` — `SKILL_NAME`, `build_graph()`, router(s), `on_transition()`
 - `commands/<name>.md` — a literal numbered procedure, not abstract prose (see
-  `${CLAUDE_PLUGIN_ROOT}/LEARNING_CHECKLIST.md` on why that distinction carries the enforcement)
+  `${CLAUDE_PLUGIN_ROOT}/LEARNING_CHECKLIST.md` on why that distinction carries the enforcement).
+  Keep the inherited step that prints the script's `banner` field verbatim — that line is how
+  the user sees which node is running and why, and it costs nothing to preserve.
 - `scripts/test_<name>_skill.py` — replace inherited teacher-shaped scenarios with the real
   graph's: each router branch, the loop, and the termination
 - `AGENTS.md`/`README.md` — replace remaining teacher/explain-demonstrate-check mentions with
