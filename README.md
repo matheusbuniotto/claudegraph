@@ -19,8 +19,6 @@ next, and Claude generates the content for whatever node it's told it's on.
   - **`scripts/graph.py` + `scripts/skill_runner.py`** — the engine underneath both. Nodes,
     edges, conditional edges, a step budget, checkpointing, and an append-only evidence log.
     No dependencies.
-- **`.claude-plugin/marketplace.json`** — marketplace manifest, so the plugin installs the same
-  way any published plugin does.
 
 ## Install
 
