@@ -8,20 +8,49 @@ step-budget handling, checkpointing, evidence logging — lives here once.
 
 CLI contract (stdin -> stdout, both JSON):
   in:  {"current_node": "check", "data": {"understood": false}, "retry_count": 0,
-        "max_retries": 2, "step_count": 0, "max_steps": 50,
-        "log_path": "...", "checkpoint_path": "..."}  # all but current_node optional
+        "max_retries": 2, "step_count": 0, "max_steps": 50, "run_id": "...",
+        "log_path": "...", "checkpoint_path": "...",
+        "actions": [{"tool": "Read", "target": "spec.md"}]}  # all but current_node optional
   out: {"next_node": "explain", "kind": "task", "goal": "...", "retry_count": 1,
-        "max_retries": 2, "step_count": 1, "done": false}
+        "max_retries": 2, "step_count": 1, "run_id": "...", "done": false}
+
+`actions` is a log-only record of what the *previous* node actually did — tool
+calls made, sources retrieved — passed on the call that reports that node's
+result. It is appended to the evidence log against that transition and never
+touches `State` or the checkpoint: it's provenance for after-the-fact review,
+not routing data. A node with nothing to report omits it or sends `[]`.
+
+`run_id` scopes one run's evidence log, checkpoint, and any artifacts the
+command file writes under one directory: `runs/<run_id>/`. Omit it on the
+first call and this generates one and returns it; carry the returned value
+forward on every later call the same way `retry_count`/`step_count` already
+are, or the next call gets its own fresh (and disconnected) run directory.
+`log_path`/`checkpoint_path`, if given explicitly, override the `run_id`-based
+default entirely — set one of those instead when a caller wants a specific
+location.
+
+`runs/latest` is a symlink to the most recent `run_id`'s directory,
+recreated on every call that uses the default paths. Recovery path for a
+session that lost track of `run_id` (context compaction, a fresh session):
+read `runs/latest/<skill>.checkpoint.json` for `current_node` etc., and
+`readlink runs/latest` for the `run_id` itself to resume the same run
+instead of forking a new one.
 """
 
 from __future__ import annotations
 
 import json
 import sys
+import time
+import uuid
 from pathlib import Path
 from typing import Callable
 
 from graph import Graph, State, StepBudgetExceeded, log_transition, save_checkpoint
+
+
+def _new_run_id() -> str:
+    return f"{time.strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:6]}"
 
 
 def run_skill(
@@ -42,10 +71,16 @@ def run_skill(
             step_count=payload.get("step_count", 0),
             max_steps=payload.get("max_steps", 50),
         )
-        log_path = Path(payload.get("log_path", f"{skill_name}_session.log.jsonl"))
-        checkpoint_path = Path(
-            payload.get("checkpoint_path", f"{skill_name}_session.checkpoint.json")
+        run_id = payload.get("run_id") or _new_run_id()
+        run_dir = Path("runs") / run_id
+        using_default_paths = not (
+            payload.get("log_path") or payload.get("checkpoint_path")
         )
+        log_path = Path(payload.get("log_path") or run_dir / f"{skill_name}.log.jsonl")
+        checkpoint_path = Path(
+            payload.get("checkpoint_path") or run_dir / f"{skill_name}.checkpoint.json"
+        )
+        actions = payload.get("actions", [])
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         print(json.dumps({"error": f"invalid input: {exc}"}), file=sys.stderr)
         sys.exit(1)
@@ -62,6 +97,13 @@ def run_skill(
     if on_transition:
         on_transition(state, next_node)
 
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    if using_default_paths:
+        latest = Path("runs") / "latest"
+        if latest.exists() or latest.is_symlink():
+            latest.unlink()
+        latest.symlink_to(run_id)
     save_checkpoint(checkpoint_path, state)
     log_transition(
         log_path,
@@ -73,6 +115,7 @@ def run_skill(
             "retry_count": state.retry_count,
             "max_retries": state.max_retries,
             "step_count": state.step_count,
+            "actions": actions,
         },
     )
 
@@ -92,6 +135,7 @@ def run_skill(
                 "retry_count": state.retry_count,
                 "max_retries": state.max_retries,
                 "step_count": state.step_count,
+                "run_id": run_id,
                 "done": kind == "end",
             }
         )

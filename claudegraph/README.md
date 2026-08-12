@@ -128,6 +128,46 @@ as a visible trace rather than undifferentiated prose:
 is composed in `skill_runner.py`, not by Claude — asking for a progress line each turn invites
 drift in wording and in what gets dropped; the only instruction is "print this".
 
+The full graph state (`next_node`/`kind`/`goal`/`retry_count`/`step_count`/`done`) is already
+the script's entire stdout contract — JSON in, JSON out. `banner` is one more key in that same
+object: a plain-text projection of it for the human reading the terminal. There's no separate
+"print of graph state" to convert — the machine-readable form already exists, and turning the
+banner itself into JSON would just make the visible trace above harder to read for no gain.
+
+## Runs, evidence, and artifacts
+
+Every call is scoped to a `run_id` — generated on the first call (no `run_id` in the payload)
+and returned in the output for the command file to carry forward on every later call, the same
+way `retry_count`/`step_count` already are. Everything that run produces lives under
+`runs/<run_id>/`:
+
+- `runs/<run_id>/<skill>.log.jsonl` — one JSONL line per call: `skill`, `from`, `to`, `data`,
+  `retry_count`, `max_retries`, `step_count`, `ts`, and `actions` (see below).
+- `runs/<run_id>/<skill>.checkpoint.json` — the full `State` after the last call, for recovering
+  `current_node` etc. if a session gets interrupted.
+- `runs/<run_id>/artifacts/<node>.md` — a convention, not engine-enforced: when a node's output
+  is substantial enough that a later node or a human should reread it without scrolling back
+  through the conversation, the command file writes it here with `Write` instead of growing
+  `data` to carry full content across steps. `data` stays for small routing signals a router
+  reads (e.g. `data.understood`); artifacts are for the content itself.
+
+`runs/latest` is a symlink to the most recent `run_id`'s directory, recreated on every call
+that uses the default paths. It exists for one failure mode: a session that loses track of
+`run_id` (context compaction, a fresh Claude session picking up mid-task) previously had no
+way back to its own evidence log — it would just start a new, disconnected run. Now it reads
+`runs/latest/<skill>.checkpoint.json` for `current_node` and `readlink runs/latest` for
+`run_id`, and resumes the same run instead. Passing explicit `log_path`/`checkpoint_path`
+opts out of `runs/<run_id>/` entirely, including this symlink.
+
+`actions` is a log-only record of what the *previous* node actually did — tool calls made,
+sources retrieved, an artifact written — passed on the call that reports that node's result.
+It's appended to the log entry for that transition and never touches `State` or the
+checkpoint: provenance for after-the-fact review, not routing data a router could read.
+
+Passing explicit `log_path`/`checkpoint_path` overrides the `run_id`-based default entirely,
+for a caller that wants a specific location instead. See the CLI contract in
+`skill_runner.py`'s module docstring for the exact shape.
+
 ## Known limitations
 
 - **Enforcement is partial, not absolute.** The script's routing is deterministic once called,

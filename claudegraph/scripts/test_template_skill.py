@@ -11,6 +11,7 @@ sys.path.insert(
     0, str(Path(__file__).parent)
 )  # so `import graph` works when run as scripts.test_template_skill
 from graph import load_checkpoint
+from template_skill import SKILL_NAME
 
 SCRIPT = Path(__file__).parent / "template_skill.py"
 
@@ -113,6 +114,115 @@ class TeacherSkillTests(unittest.TestCase):
         self.assertEqual(
             len(self.log_path.read_text().splitlines()), 2
         )  # appended, not overwritten
+
+    def run_skill_with_defaults(self, payload: dict) -> subprocess.CompletedProcess:
+        """Like run_skill, but doesn't override log_path/checkpoint_path — exercises
+        the run_id-based default paths, scoped to a throwaway cwd."""
+        return subprocess.run(
+            [sys.executable, str(SCRIPT)],
+            input=json.dumps(payload),
+            cwd=self._tmp.name,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_run_id_generated_and_scopes_default_paths(self):
+        out = json.loads(
+            self.run_skill_with_defaults({"current_node": "explain", "data": {}}).stdout
+        )
+        self.assertIn("run_id", out)
+        run_dir = Path(self._tmp.name) / "runs" / out["run_id"]
+        self.assertTrue((run_dir / f"{SKILL_NAME}.log.jsonl").exists())
+        self.assertTrue((run_dir / f"{SKILL_NAME}.checkpoint.json").exists())
+
+    def test_runs_latest_recovers_a_dropped_run_id(self):
+        first = json.loads(
+            self.run_skill_with_defaults({"current_node": "explain", "data": {}}).stdout
+        )
+        latest = Path(self._tmp.name) / "runs" / "latest"
+        self.assertTrue(latest.is_symlink())
+        self.assertEqual(latest.resolve().name, first["run_id"])
+
+        checkpoint = load_checkpoint(latest / f"{SKILL_NAME}.checkpoint.json")
+        self.assertEqual(checkpoint.current_node, "explain")  # recovered, not guessed
+
+        second = json.loads(
+            self.run_skill_with_defaults(
+                {
+                    "current_node": checkpoint.current_node,
+                    "data": {},
+                    "run_id": first["run_id"],  # as if read via readlink runs/latest
+                }
+            ).stdout
+        )
+        self.assertEqual(second["run_id"], first["run_id"])  # same run, not a new fork
+
+    def test_explicit_paths_skip_runs_latest(self):
+        self.run_skill_with_defaults(
+            {
+                "current_node": "explain",
+                "data": {},
+                "log_path": str(self.log_path),
+                "checkpoint_path": str(self.checkpoint_path),
+            }
+        )
+        self.assertTrue(self.log_path.exists())  # explicit paths still honored
+        self.assertFalse(
+            (Path(self._tmp.name) / "runs").exists()
+        )  # no runs/ side effect
+
+    def test_run_id_carried_forward_reuses_same_run_dir(self):
+        first = json.loads(
+            self.run_skill_with_defaults({"current_node": "explain", "data": {}}).stdout
+        )
+        second = json.loads(
+            self.run_skill_with_defaults(
+                {
+                    "current_node": "demonstrate",
+                    "data": {},
+                    "retry_count": first["retry_count"],
+                    "step_count": first["step_count"],
+                    "run_id": first["run_id"],
+                }
+            ).stdout
+        )
+        self.assertEqual(second["run_id"], first["run_id"])
+        log_lines = (
+            (
+                Path(self._tmp.name)
+                / "runs"
+                / first["run_id"]
+                / f"{SKILL_NAME}.log.jsonl"
+            )
+            .read_text()
+            .splitlines()
+        )
+        self.assertEqual(len(log_lines), 2)  # both calls landed in the same run dir
+
+    def test_actions_logged_but_not_checkpointed(self):
+        self.run_skill(
+            {
+                "current_node": "explain",
+                "data": {},
+                "retry_count": 0,
+                "max_retries": 2,
+                "actions": [{"tool": "Read", "target": "spec.md"}],
+            }
+        )
+        entry = json.loads(self.log_path.read_text().splitlines()[0])
+        self.assertEqual(entry["actions"], [{"tool": "Read", "target": "spec.md"}])
+
+        checkpoint = load_checkpoint(self.checkpoint_path)
+        self.assertEqual(
+            checkpoint.data, {}
+        )  # actions never leak into State/checkpoint
+
+    def test_actions_default_to_empty_list(self):
+        self.run_skill(
+            {"current_node": "explain", "data": {}, "retry_count": 0, "max_retries": 2}
+        )
+        entry = json.loads(self.log_path.read_text().splitlines()[0])
+        self.assertEqual(entry["actions"], [])
 
     def test_checkpoint_round_trip(self):
         self.run_skill(

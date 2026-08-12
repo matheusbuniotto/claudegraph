@@ -11,7 +11,7 @@ Nothing here is invented by the agent — every value comes from the user's answ
 | `kind` | yes | `kind=NodeKind.TASK / HUMAN_GATE / END` | `human_gate` means the command file must stop and wait for a human answer before the next script call |
 | `goal` | yes | `goal="..."` — surfaced in the script's stdout, read by the command file | one imperative line; this is what Claude actually generates at that node |
 | `agent` | yes | `agent="..."` | `claude-inline` (Claude generates it in-conversation) or a named subagent the command file should dispatch to — see "Node attachments" below |
-| `expected_output` | yes | keys the command file writes into `data` after the node runs | what downstream routers read; a node whose output nothing reads is a smell worth raising |
+| `expected_output` | yes | keys the command file writes into `data` after the node runs, or a `runs/<run_id>/artifacts/<node>.md` file for substantial content | what downstream routers read; a node whose output nothing reads is a smell worth raising. Put full content (a report, a log summary) in an artifact and only a pointer/short signal in `data` — `data` rides in every log line and the checkpoint on every step, so it should stay small |
 | `log_fields` | no | extra keys merged into the `log_transition` event | defaults already cover from/to/data/retry_count/step_count — only add what's genuinely missing |
 | `skill` | no | a `skills/<name>/SKILL.md` in the generated plugin | only when the node needs reusable domain knowledge — see below |
 | `mcp_tools` | no | an entry in the generated plugin's `.mcp.json` | the external system(s) this node reads or writes |
@@ -86,7 +86,8 @@ nodes:
     goal: pull recent logs/metrics for the named service and summarize anomalies
     agent: gather-evidence-agent      # long, noisy search — isolate it from the conversation
     mcp_tools: [grafana]              # needs metrics from an external system
-    expected_output: data.evidence_summary (string)
+    expected_output: runs/<run_id>/artifacts/gather_evidence.md (full summary),
+                     data.evidence_path (string, pointer to that file)
   - name: confirm_with_human
     kind: human_gate
     goal: present the severity + evidence, ask the engineer to confirm or correct

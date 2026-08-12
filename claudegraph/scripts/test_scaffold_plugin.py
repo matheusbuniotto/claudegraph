@@ -116,15 +116,17 @@ class ScaffoldTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_runtime_artifacts_use_the_new_plugin_name(self):
-        subprocess.run(
+        proc = subprocess.run(
             [sys.executable, "scripts/demo_flow_skill.py"],
             cwd=self.plugin,
             input=json.dumps({"current_node": "explain", "data": {}}),
             capture_output=True,
             text=True,
         )
-        self.assertTrue((self.plugin / "demo-flow_session.log.jsonl").exists())
-        self.assertTrue((self.plugin / "demo-flow_session.checkpoint.json").exists())
+        run_id = json.loads(proc.stdout)["run_id"]
+        run_dir = self.plugin / "runs" / run_id
+        self.assertTrue((run_dir / "demo-flow.log.jsonl").exists())
+        self.assertTrue((run_dir / "demo-flow.checkpoint.json").exists())
 
     def test_refuses_to_overwrite_existing_destination(self):
         proc = subprocess.run(
