@@ -32,19 +32,7 @@ next, and Claude generates the content for whatever node it's told it's on.
 Then run `/teacher <topic>` to see the pattern, or ask Claude to scaffold a new graph-based
 plugin to use the generator.
 
-## Design notes
-
-The repo documents its own reasoning rather than just its API:
-
-- **`claudegraph/README.md`** — structure, install, and how to customize.
-- **`claudegraph/ROADMAP.md`** — ideas considered and *deliberately deferred*, with why
-  (parallel/DAG execution, declarative graph specs, hook-based hard enforcement).
-- **`claudegraph/LEARNING_CHECKLIST.md`** — the design decisions behind the current shape.
-
+## Limitations
 Known limitations are stated plainly in `claudegraph/README.md` — most importantly that this
 shrinks the "Claude might not follow instructions" problem rather than eliminating it, and that
 the engine is single-active-node, not a parallel DAG scheduler.
-
-## License
-
-MIT
