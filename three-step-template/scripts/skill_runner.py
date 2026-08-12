@@ -1,6 +1,6 @@
 """Generic CLI driver for any skill built on graph.py.
 
-Not something a skill author edits — teacher_skill.py shows what to write
+Not something a skill author edits — template_skill.py shows what to write
 instead: a build_graph() function, router function(s), and optionally an
 on_transition hook for skill-specific policy (e.g. counting a particular
 loop as a retry). Everything else — stdin/stdout JSON, boundary validation,

@@ -8,7 +8,7 @@ Topic: $ARGUMENTS
 You MUST follow this exact procedure. Do not skip the script call. Do not narrate a step's content before calling the script for it.
 
 1. Initialize state: `{"current_node": "explain", "data": {}, "retry_count": 0, "max_retries": 2}`
-2. Run: `echo '<state json>' | python3 ${CLAUDE_PLUGIN_ROOT}/scripts/teacher_skill.py`
+2. Run: `echo '<state json>' | python3 ${CLAUDE_PLUGIN_ROOT}/scripts/template_skill.py`
    - If it exits non-zero, stop and show the user the `error` field (covers malformed input and
      the step-budget safety net tripping). Do not proceed.
 3. Read `next_node`, `kind`, and `goal` from the output. Generate content matching that node's

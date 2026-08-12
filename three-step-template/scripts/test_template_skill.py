@@ -1,4 +1,4 @@
-"""Stdlib-only tests. Run: python3 -m unittest scripts.test_teacher_skill -v"""
+"""Stdlib-only tests. Run: python3 -m unittest scripts.test_template_skill -v"""
 
 import json
 import subprocess
@@ -9,10 +9,10 @@ from pathlib import Path
 
 sys.path.insert(
     0, str(Path(__file__).parent)
-)  # so `import graph` works when run as scripts.test_teacher_skill
+)  # so `import graph` works when run as scripts.test_template_skill
 from graph import load_checkpoint
 
-SCRIPT = Path(__file__).parent / "teacher_skill.py"
+SCRIPT = Path(__file__).parent / "template_skill.py"
 
 
 class TeacherSkillTests(unittest.TestCase):

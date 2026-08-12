@@ -32,10 +32,10 @@ A factory that builds a `Graph` from plain data (`{"nodes": [...], "edges": {...
 **Still deferred, but distinguish this from `skill_runner.py` (which *was* built):**
 `skill_runner.py` extracted the CLI driver boilerplate (stdin parsing, error handling,
 checkpoint/log wiring) because it's identical, provably-duplicated code across any skill,
-observed directly while writing the second version of `teacher_skill.py` — not a guess about
+observed directly while writing the second version of `template_skill.py` — not a guess about
 the future. `Graph.from_spec` would replace *topology-building Python* with *topology-as-data*,
 which is a different, more speculative bet (does topology actually need to be non-code-editable
-by whoever's writing the skill? unclear). `teacher_skill.py` is still the only topology example.
+by whoever's writing the skill? unclear). `template_skill.py` is still the only topology example.
 Revisit once a second skill's topology exists to generalize from two concrete cases.
 
 ## Hard enforcement via hooks

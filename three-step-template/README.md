@@ -8,6 +8,9 @@ prose instructions Claude may or may not follow. Copy this directory to start a 
 
 ```
 three-step-template/
+├── AGENTS.md                 # rules for agents working in this repo: how to add a skill/
+│   │                          #   feature, where new code belongs, when to push back
+├── CLAUDE.md -> AGENTS.md    # symlink, same content — single source of truth
 ├── .claude-plugin/
 │   └── plugin.json           # manifest (required)
 ├── commands/
@@ -20,10 +23,10 @@ three-step-template/
 │   ├── skill_runner.py        # generic CLI driver: stdin/stdout JSON, boundary validation,
 │   │                          #   step-budget handling, checkpointing, evidence logging —
 │   │                          #   reused as-is by every skill, never edited per-skill
-│   ├── teacher_skill.py       # THE TEMPLATE — copy this file for a new skill. Only defines
+│   ├── template_skill.py       # THE TEMPLATE — copy this file for a new skill. Only defines
 │   │                          #   SKILL_NAME, build_graph(), a router, and an on_transition
 │   │                          #   policy hook; everything else comes from skill_runner.py
-│   └── test_teacher_skill.py  # stdlib unittest, run: python3 -m unittest scripts.test_teacher_skill -v
+│   └── test_template_skill.py  # stdlib unittest, run: python3 -m unittest scripts.test_template_skill -v
 ├── LEARNING_CHECKLIST.md     # design rationale from building this: problem / solution / context
 ├── ROADMAP.md                # ideas considered and deliberately deferred
 └── README.md
@@ -50,7 +53,7 @@ from registered marketplace listings, not an arbitrary local directory.
 1. Rename `name` in `.claude-plugin/plugin.json` (and in `marketplace.json`'s `plugins[].name`/`source`).
 2. `scripts/graph.py` and `scripts/skill_runner.py` are the reusable parts — leave them alone
    unless the engine or driver plumbing itself needs to change.
-3. Copy `scripts/teacher_skill.py` to `scripts/<your_skill>.py` and edit only what it says is
+3. Copy `scripts/template_skill.py` to `scripts/<your_skill>.py` and edit only what it says is
    skill-specific: `SKILL_NAME`, `build_graph()` (nodes with `kind`/`goal`/`agent`, edges), a
    router function per `add_conditional_edge`, and an optional `on_transition()` hook for
    skill-specific policy (e.g. counting a particular loop as a retry). End the file with
