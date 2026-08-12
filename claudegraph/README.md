@@ -1,4 +1,4 @@
-# three-step-template
+# claudegraph
 
 A cookie-cutter builder for LangGraph-style Claude Code plugins: stdlib-only state-graph
 execution where routing is enforced by deterministic code, not by prose instructions Claude
@@ -12,7 +12,7 @@ copy by hand if you'd rather not use the generator.
 ## Structure
 
 ```
-three-step-template/
+claudegraph/
 ├── AGENTS.md                 # rules for agents working in this repo: how to add a skill/
 │   │                          #   feature, where new code belongs, when to push back
 ├── CLAUDE.md -> AGENTS.md    # symlink, same content — single source of truth
@@ -46,15 +46,20 @@ three-step-template/
 
 **Fast dev loop** (no marketplace, loads the plugin directly for a session):
 ```
-claude --plugin-dir ./three-step-template
+claude --plugin-dir ./claudegraph
 ```
 
-**Real install path** (what an actual user goes through — needs a marketplace):
+**Install from GitHub:**
 ```
-/plugin marketplace add /path/to/marketplace-repo
-/plugin install three-step-template@<marketplace-name>
+/plugin marketplace add matheusbuniotto/claudegraph
+/plugin install claudegraph@claudegraph
 ```
-See `../.claude-plugin/marketplace.json` in this repo for a working local marketplace example.
+
+**Install from a local clone:**
+```
+/plugin marketplace add /path/to/claudegraph
+/plugin install claudegraph@claudegraph
+```
 Note: local-path marketplaces are CLI-only — the Claude Desktop/Cowork plugin UI only installs
 from registered marketplace listings, not an arbitrary local directory.
 

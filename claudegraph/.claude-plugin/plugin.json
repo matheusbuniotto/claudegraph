@@ -1,5 +1,5 @@
 {
-  "name": "three-step-template",
+  "name": "claudegraph",
   "version": "1.0.0",
   "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
   "author": {

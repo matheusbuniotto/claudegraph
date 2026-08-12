@@ -47,6 +47,6 @@ history already does in `ROADMAP.md`, and let the user decide with that in
 view — agreement without that context is the risk, not the pushback.
 
 Every change ships with passing tests
-(`python3 -m unittest scripts.test_template_skill -v` from `three-step-template/`)
+(`python3 -m unittest scripts.test_template_skill -v` from `claudegraph/`)
 and, if behavior changed, an updated `README.md`/`ROADMAP.md` — a stale doc
 here is worse than no doc.

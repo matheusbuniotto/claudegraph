@@ -16,7 +16,7 @@ parallelism than to a single-position state machine:
   nodes can run concurrently — it's not a node type to declare, it's a consequence of the
   dependency graph.
 
-**Why this wasn't built into `three-step-template`:** it requires a different state model
+**Why this wasn't built into `claudegraph`:** it requires a different state model
 (per-node status across the whole graph — `pending/ready/running/done/blocked` — not a
 single `current_node`), and true parallel dispatch has to happen on Claude's side (parallel
 Agent/Task calls), not inside the stateless routing script. That's a legitimate, bigger

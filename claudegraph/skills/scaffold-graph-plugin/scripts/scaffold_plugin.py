@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scaffold a new graph-style plugin from three-step-template.
+"""Scaffold a new graph-style plugin from claudegraph.
 
 Deterministic, mechanical part only: copies graph.py/skill_runner.py verbatim
 (never touched per-plugin — they're skill-agnostic by design), renames the
@@ -9,7 +9,7 @@ domain knowledge only the requester has, and stays SKILL.md's job to guide.
 
 Usage:
   python3 scaffold_plugin.py --name my-plugin --description "..." --dest /path/to/parent
-  [--source /path/to/three-step-template]  # defaults to this skill's own template root
+  [--source /path/to/claudegraph]  # defaults to this skill's own template root
 """
 
 from __future__ import annotations

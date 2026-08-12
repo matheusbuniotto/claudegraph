@@ -1,15 +1,15 @@
 {
-  "name": "matheus-local-plugins",
-  "description": "Local marketplace for developing and testing plugins before publishing.",
+  "name": "claudegraph",
+  "description": "Marketplace for claudegraph — a Claude Code plugin for building LangGraph-style plugins.",
   "owner": {
     "name": "Matheus Buniotto",
     "email": "matheus.buniotto@gmail.com"
   },
   "plugins": [
     {
-      "name": "three-step-template",
+      "name": "claudegraph",
       "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
-      "source": "./three-step-template"
+      "source": "./claudegraph"
     }
   ]
 }
