@@ -7,11 +7,20 @@ node has all three is a failure of that judgment, not thoroughness.
 This directory is excluded from generated plugins (`EXCLUDE_RELPATHS` in
 `../scripts/scaffold_plugin.py`) — it is generator machinery, not plugin content.
 
-| Template | Copy to | Loaded from |
+| Template | Copy to | Applied by |
 |---|---|---|
-| `agent.md` | `agents/<node-name>-agent.md` | plugin root `agents/`, auto-discovered |
-| `skill.md` | `skills/<kebab-name>/SKILL.md` | plugin root `skills/`, filename must be `SKILL.md` |
-| `mcp.json` | `.mcp.json` (note the leading dot) | **plugin root only** |
+| `plugin-README.md` | `README.md` | `scaffold_plugin.py`, automatically |
+| `plugin-AGENTS.md` | `AGENTS.md` (+ `CLAUDE.md` symlink) | `scaffold_plugin.py`, automatically |
+| `agent.md` | `agents/<node-name>-agent.md` | `/build-graph`, per flagged node |
+| `skill.md` | `skills/<kebab-name>/SKILL.md` | `/build-graph`, per flagged node |
+| `mcp.json` | `.mcp.json` (note the leading dot) | `/build-graph`, per flagged node |
+
+`plugin-README.md` and `plugin-AGENTS.md` are rendered by the scaffold script with
+`{{NAME}}`/`{{DESCRIPTION}}`/`{{PY_STEM}}` substituted — they exist so a generated plugin
+documents *itself* rather than inheriting claudegraph's README, AGENTS, and ROADMAP. That
+inheritance was a real bug: generated plugins shipped with claudegraph's deferred-ideas
+backlog and rules about commands they don't have. `scripts/test_scaffold_plugin.py` now
+fails if any claudegraph identity leaks into a scaffolded plugin.
 
 `mcp.json` is stored without the leading dot on purpose: a real `.mcp.json` sitting in the
 plugin would be auto-loaded and its placeholder server would fail to start. Rename it on

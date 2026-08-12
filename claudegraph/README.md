@@ -36,10 +36,12 @@ claudegraph/
 ├── references/
 │   └── graph-spec.md         # field schema the interrogation fills, worked example, how each
 │                              #   field maps to code, and when a node warrants an attachment
-├── templates/                # adapted by /build-graph into the generated plugin, per node, only
-│   ├── agent.md               #   when graph-spec rules flag it; see templates/README.md for
-│   ├── skill.md               #   destination paths and the frontmatter traps that fail silently
-│   └── mcp.json               #   (tools vs allowed-tools, fields plugin subagents ignore)
+├── templates/                # see templates/README.md. plugin-README/plugin-AGENTS are
+│   ├── plugin-README.md       #   rendered into every generated plugin so it documents itself
+│   ├── plugin-AGENTS.md       #   rather than inheriting claudegraph's docs; agent/skill/mcp
+│   ├── agent.md               #   are adapted per node, only when graph-spec rules flag it
+│   ├── skill.md               #
+│   └── mcp.json               #
 ├── scripts/
 │   ├── graph.py               # generic engine: NodeKind, NodeMeta, State, Graph
 │   │                          #   (add_node/add_edge/add_conditional_edge/step/node_meta),

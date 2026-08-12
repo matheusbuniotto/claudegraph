@@ -16,15 +16,34 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 
 # This script lives at <plugin-root>/scripts/scaffold_plugin.py
 DEFAULT_SOURCE = Path(__file__).resolve().parents[1]
 
-# Not copied: .git internals, caches, and session-specific history that doesn't
-# apply to a new plugin.
-EXCLUDE_NAMES = {"LEARNING_CHECKLIST.md", "__pycache__", ".git", ".ruff_cache"}
+# Not copied: .git internals, caches, and claudegraph's own design history.
+# LEARNING_CHECKLIST.md and ROADMAP.md record decisions and deferrals made while
+# building claudegraph — a fresh plugin has neither, and inheriting them ships a
+# new project with someone else's backlog.
+EXCLUDE_NAMES = {
+    "LEARNING_CHECKLIST.md",
+    "ROADMAP.md",
+    "__pycache__",
+    ".git",
+    ".ruff_cache",
+}
+
+# Rendered fresh from templates/ rather than copied, so the generated plugin
+# documents itself instead of claudegraph. README is fully plugin-specific;
+# AGENTS.md keeps the rules that genuinely transfer (don't edit the engine,
+# where domain code belongs, tests must pass) and drops claudegraph's meta-rules
+# about its own generator commands.
+RENDERED = {
+    Path("README.md"): "plugin-README.md",
+    Path("AGENTS.md"): "plugin-AGENTS.md",
+}
 
 # Runtime artifacts from running the source template (evidence logs, checkpoints).
 # Copying them would hand a new plugin someone else's session history.
@@ -35,6 +54,7 @@ EXCLUDE_SUFFIXES = (".log.jsonl", ".checkpoint.json", ".pyc")
 # ship a /build-graph command it has no business owning.
 EXCLUDE_RELPATHS = {
     Path("scripts/scaffold_plugin.py"),
+    Path("scripts/test_scaffold_plugin.py"),
     Path("commands/build-graph.md"),
     Path("commands/graph-spec.md"),
     Path("references/graph-spec.md"),
@@ -52,6 +72,7 @@ def _make_ignore(source: Path):
             if n in EXCLUDE_NAMES
             or n.endswith(EXCLUDE_SUFFIXES)
             or (rel_dir / n) in EXCLUDE_RELPATHS
+            or (rel_dir / n) in RENDERED
         ]
 
     return _ignored
@@ -89,28 +110,68 @@ def scaffold(name: str, description: str, dest_parent: Path, source: Path) -> Pa
     command_path = dest / "commands" / f"{name}.md"
     (dest / "commands" / "teacher.md").rename(command_path)
 
-    # Mechanical fix-up, not domain content: the renamed test/command files
-    # still reference the old filenames internally (e.g. SCRIPT = ... /
-    # "template_skill.py"), which would point at a file that no longer
-    # exists. Repoint them so what's left to edit is runnable, not broken.
-    test_path.write_text(
-        test_path.read_text().replace("template_skill", f"{py_stem}_skill")
-    )
-    command_path.write_text(
-        command_path.read_text().replace(
-            "scripts/template_skill.py", f"scripts/{py_stem}_skill.py"
+    # Mechanical fix-up, not domain content: the renamed files still carry the
+    # source plugin's filenames and identity internally (SCRIPT = ... /
+    # "template_skill.py", SKILL_NAME = "teacher", `name: teacher` frontmatter).
+    # Left alone, the command isn't invocable under its own name and the log and
+    # checkpoint files are written under "teacher". Repoint them so what's left
+    # to edit is the graph itself, not someone else's labels.
+    pascal = "".join(part.capitalize() for part in name.replace("-", "_").split("_"))
+
+    skill_path = dest / "scripts" / f"{py_stem}_skill.py"
+    skill_path.write_text(
+        skill_path.read_text().replace(
+            'SKILL_NAME = "teacher"', f'SKILL_NAME = "{name}"'
         )
     )
+
+    test_path.write_text(
+        test_path.read_text()
+        .replace("template_skill", f"{py_stem}_skill")
+        .replace("class TeacherSkillTests", f"class {pascal}SkillTests")
+    )
+
+    command_text = command_path.read_text().replace(
+        "scripts/template_skill.py", f"scripts/{py_stem}_skill.py"
+    )
+    command_text = re.sub(r"^name: teacher$", f"name: {name}", command_text, flags=re.M)
+    command_text = re.sub(
+        r"^description: .*$",
+        f"description: {json.dumps(description)}",
+        command_text,
+        count=1,
+        flags=re.M,
+    )
+    command_path.write_text(command_text)
+
+    # Render the generated plugin's own docs, replacing (not copying) claudegraph's.
+    for rel_target, template_name in RENDERED.items():
+        text = (source / "templates" / template_name).read_text()
+        for placeholder, value in (
+            ("{{NAME}}", name),
+            ("{{DESCRIPTION}}", description),
+            ("{{PY_STEM}}", py_stem),
+        ):
+            text = text.replace(placeholder, value)
+        (dest / rel_target).write_text(text)
 
     plugin_json_path = dest / ".claude-plugin" / "plugin.json"
     plugin_json = json.loads(plugin_json_path.read_text())
     plugin_json["name"] = name
     plugin_json["description"] = description
+    # claudegraph's identity, not the new plugin's — drop rather than misattribute.
+    for inherited in ("homepage", "repository", "keywords", "author"):
+        plugin_json.pop(inherited, None)
     plugin_json_path.write_text(json.dumps(plugin_json, indent=2) + "\n")
 
-    if (dest / "CLAUDE.md").is_symlink():
-        (dest / "CLAUDE.md").unlink()
-        (dest / "CLAUDE.md").symlink_to("AGENTS.md")
+    # copytree dereferences symlinks, so CLAUDE.md arrives as a regular file
+    # holding the SOURCE plugin's AGENTS.md text — which then survives AGENTS.md
+    # being rendered fresh. Recreate the link unconditionally rather than testing
+    # is_symlink(), which is False in exactly the case that needs fixing.
+    claude_md = dest / "CLAUDE.md"
+    if claude_md.exists() or claude_md.is_symlink():
+        claude_md.unlink()
+    claude_md.symlink_to("AGENTS.md")
 
     return dest
 
