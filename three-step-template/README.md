@@ -14,7 +14,8 @@ three-step-template/
 │   └── teacher.md            # /teacher — literal, numbered procedure that calls the script
 ├── scripts/
 │   ├── graph.py               # generic engine: State, Graph (add_node/add_edge/
-│   │                          #   add_conditional_edge/step) — knows nothing about teaching
+│   │                          #   add_conditional_edge/step) + log_transition() —
+│   │                          #   knows nothing about teaching
 │   ├── teacher_skill.py       # example skill: explain -> demonstrate -> check,
 │   │                          #   loops on misunderstanding, exits via retry_count vs max_retries
 │   └── test_teacher_skill.py  # stdlib unittest, run: python3 -m unittest scripts.test_teacher_skill -v
@@ -63,7 +64,9 @@ depends_on graphs) considered and explicitly deferred as a separate, future proj
 
 - **Enforcement is partial, not absolute.** The script's routing is deterministic once called,
   but nothing mechanically forces Claude to call it instead of free-forming — that still rests
-  on `commands/teacher.md`'s instructions. A `PreToolUse` hook could make this a hard guarantee;
-  not built here, see `ROADMAP.md`.
+  on `commands/teacher.md`'s instructions. Every real call appends evidence to a JSONL log
+  (`log_transition` in `graph.py`, wired in `teacher_skill.py`) — a *detective* control (proves
+  after the fact whether the script ran), not a *preventive* one. A `PreToolUse` hook could make
+  it a hard guarantee instead; not built here, see `ROADMAP.md`.
 - **Single active node only.** This models one position moving through the graph over time —
   not concurrent branches. See `ROADMAP.md` for what a true parallel/DAG version would require.

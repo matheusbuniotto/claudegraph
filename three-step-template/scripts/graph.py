@@ -7,7 +7,10 @@ Content generation happens outside this process (Claude, inline).
 
 from __future__ import annotations
 
+import json
+import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable
 
 
@@ -47,3 +50,14 @@ class Graph:
         if state.current_node in self._edges:
             return self._edges[state.current_node]
         return state.current_node  # terminal: no outgoing edge, stay put
+
+
+def log_transition(log_path: Path, event: dict[str, Any]) -> None:
+    """Append one JSON line as evidence this transition actually ran.
+
+    Deliberately dumb (append-only, no rotation, no locking) — it exists to answer
+    "did the script really get called here," not to be a production logging system.
+    """
+    record = {"ts": time.time(), **event}
+    with log_path.open("a") as f:
+        f.write(json.dumps(record) + "\n")
