@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "<server-name>": {
+      "command": "npx",
+      "args": ["-y", "@scope/mcp-server-name"],
+      "env": {}
+    },
+    "<bundled-server>": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/my_mcp_server.py",
+      "args": [],
+      "env": {
+        "CONFIG_PATH": "${CLAUDE_PLUGIN_ROOT}/config.json"
+      }
+    }
+  }
+}

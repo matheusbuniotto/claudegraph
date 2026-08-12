@@ -21,7 +21,9 @@ Nothing here is invented by the agent — every value comes from the user's answ
 All three are **optional and per node**. The default (`agent: claude-inline`, no skill, no
 MCP) is correct for most nodes, and a plugin where every node has all three is a plugin
 that will be harder to read than the problem it solves. Templates to adapt live in
-`../templates/`.
+`../templates/` — see its `README.md` for destination paths and the frontmatter fields
+that fail silently when confused (`tools` vs `allowed-tools`; the fields plugin subagents
+ignore; the six-field limit on packaged skills).
 
 **Dedicated agent** (`templates/agent.md`) — warranted when the node's work would flood the
 main conversation or needs isolation:

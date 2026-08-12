@@ -36,10 +36,10 @@ claudegraph/
 ├── references/
 │   └── graph-spec.md         # field schema the interrogation fills, worked example, how each
 │                              #   field maps to code, and when a node warrants an attachment
-├── templates/                # adapted by /build-graph into the generated plugin, per node,
-│   ├── agent.md               #   only when the graph-spec rules flag that node — a subagent
-│   ├── skill.md               #   for isolated/noisy work, a skill for reused domain knowledge,
-│   └── .mcp.json              #   an MCP entry for reaching an external system
+├── templates/                # adapted by /build-graph into the generated plugin, per node, only
+│   ├── agent.md               #   when graph-spec rules flag it; see templates/README.md for
+│   ├── skill.md               #   destination paths and the frontmatter traps that fail silently
+│   └── mcp.json               #   (tools vs allowed-tools, fields plugin subagents ignore)
 ├── scripts/
 │   ├── graph.py               # generic engine: NodeKind, NodeMeta, State, Graph
 │   │                          #   (add_node/add_edge/add_conditional_edge/step/node_meta),

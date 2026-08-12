@@ -6,6 +6,8 @@
     "name": "Matheus Buniotto",
     "email": "matheus.buniotto@gmail.com"
   },
+  "homepage": "https://github.com/matheusbuniotto/claudegraph",
+  "repository": "https://github.com/matheusbuniotto/claudegraph",
   "license": "MIT",
   "keywords": ["template", "starter", "cookie-cutter", "langgraph", "state-graph", "scaffold"]
 }

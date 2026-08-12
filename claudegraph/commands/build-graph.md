@@ -51,15 +51,17 @@ Fill in from the spec:
   the real domain
 
 Then, **only for nodes the spec flagged with an attachment**, adapt the matching template
-from `${CLAUDE_PLUGIN_ROOT}/templates/`:
+from `${CLAUDE_PLUGIN_ROOT}/templates/`. Read `${CLAUDE_PLUGIN_ROOT}/templates/README.md`
+first — it lists the destination paths and the frontmatter traps that fail silently. Each
+template also carries its own comment block of rules; **delete that block when adapting.**
 
-- `templates/agent.md` → `agents/<node>-agent.md`. Carry the node's `goal` in as the brief
-  and its `expected_output` in as the return contract, then make the generated command file
-  dispatch to it at that node instead of generating inline.
-- `templates/skill.md` → `skills/<name>/SKILL.md`.
-- `templates/.mcp.json` → `.mcp.json` at the generated plugin's root, one entry per external
-  system. Strip the `_comment` and `_example-*` keys. Tell the user plainly that this config
-  is unverified until they run it — the server has to already exist on their machine.
+- `templates/agent.md` → `agents/<node>-agent.md` in the generated plugin root. Carry the
+  node's `goal` in as the brief and its `expected_output` in as the return contract, then
+  make the generated command file dispatch to it at that node instead of generating inline.
+- `templates/skill.md` → `skills/<kebab-name>/SKILL.md` (filename exactly `SKILL.md`).
+- `templates/mcp.json` → `.mcp.json` **with the leading dot**, at the generated plugin's
+  root, one entry per external system. Tell the user plainly that this config is unverified
+  until they run it — the server has to already exist on their machine.
 
 A node with no flagged attachment gets nothing extra. Resist emitting all three for
 symmetry: the generated plugin should stay readable in one sitting.
