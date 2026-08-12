@@ -9,13 +9,14 @@ next, and Claude generates the content for whatever node it's told it's on.
 
 ## What's in here
 
-- **`claudegraph/`** — the plugin.
-  - **`skills/scaffold-graph-plugin/`** — the generator. Interrogates you for a complete graph
-    spec (per node: kind, goal, tools, expected output, logging; per edge: exact conditions and
-    destinations; per loop: trigger and termination), then produces a working plugin from it.
-  - **`scripts/graph.py` + `scripts/skill_runner.py`** — the engine. Nodes, edges, conditional
-    edges, a step budget, checkpointing, and an append-only evidence log. No dependencies.
-  - **`/teacher`** — a worked example that proves the pattern end to end.
+- **`claudegraph/`** — the plugin. Two commands, deliberately:
+  - **`/build-graph`** — the generator. Interrogates you for a complete graph spec (per node:
+    kind, goal, tools, expected output, logging; per edge: exact conditions and destinations;
+    per loop: trigger and termination), then scaffolds and fills in a working plugin.
+  - **`/teacher`** — the example run that proves the pattern end to end.
+  - **`scripts/graph.py` + `scripts/skill_runner.py`** — the engine underneath both. Nodes,
+    edges, conditional edges, a step budget, checkpointing, and an append-only evidence log.
+    No dependencies.
 - **`.claude-plugin/marketplace.json`** — marketplace manifest, so the plugin installs the same
   way any published plugin does.
 

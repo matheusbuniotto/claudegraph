@@ -5,11 +5,11 @@ Deterministic, mechanical part only: copies graph.py/skill_runner.py verbatim
 (never touched per-plugin — they're skill-agnostic by design), renames the
 template skill/test/command files, and rewrites plugin.json's name/description.
 It does NOT write any graph logic (nodes, router, command procedure) — that's
-domain knowledge only the requester has, and stays SKILL.md's job to guide.
+domain knowledge only the requester has, and stays /build-graph's job to guide.
 
 Usage:
   python3 scaffold_plugin.py --name my-plugin --description "..." --dest /path/to/parent
-  [--source /path/to/claudegraph]  # defaults to this skill's own template root
+  [--source /path/to/claudegraph]  # defaults to this plugin's own root
 """
 
 from __future__ import annotations
@@ -17,29 +17,42 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
-import sys
 from pathlib import Path
 
-# This script lives at <template>/skills/scaffold-graph-plugin/scripts/scaffold_plugin.py
-DEFAULT_SOURCE = Path(__file__).resolve().parents[3]
+# This script lives at <plugin-root>/scripts/scaffold_plugin.py
+DEFAULT_SOURCE = Path(__file__).resolve().parents[1]
 
-# Not copied into the new plugin: .git internals, the scaffolder itself (avoid
-# infinite nesting), and session-specific history that doesn't apply to a new plugin.
-EXCLUDE_NAMES = {
-    "skills",
-    "LEARNING_CHECKLIST.md",
-    "__pycache__",
-    ".git",
-    ".ruff_cache",
-}
+# Not copied: .git internals, caches, and session-specific history that doesn't
+# apply to a new plugin.
+EXCLUDE_NAMES = {"LEARNING_CHECKLIST.md", "__pycache__", ".git", ".ruff_cache"}
 
 # Runtime artifacts from running the source template (evidence logs, checkpoints).
 # Copying them would hand a new plugin someone else's session history.
 EXCLUDE_SUFFIXES = (".log.jsonl", ".checkpoint.json", ".pyc")
 
+# The generator's own machinery. A plugin built by claudegraph is a graph plugin,
+# not another copy of claudegraph — without this, every generated plugin would
+# ship a /build-graph command it has no business owning.
+EXCLUDE_RELPATHS = {
+    Path("scripts/scaffold_plugin.py"),
+    Path("commands/build-graph.md"),
+    Path("references/graph-spec.md"),
+    Path("references"),
+}
 
-def _ignored(_dir: str, names: list[str]) -> list[str]:
-    return [n for n in names if n in EXCLUDE_NAMES or n.endswith(EXCLUDE_SUFFIXES)]
+
+def _make_ignore(source: Path):
+    def _ignored(current_dir: str, names: list[str]) -> list[str]:
+        rel_dir = Path(current_dir).resolve().relative_to(source)
+        return [
+            n
+            for n in names
+            if n in EXCLUDE_NAMES
+            or n.endswith(EXCLUDE_SUFFIXES)
+            or (rel_dir / n) in EXCLUDE_RELPATHS
+        ]
+
+    return _ignored
 
 
 def scaffold(name: str, description: str, dest_parent: Path, source: Path) -> Path:
@@ -50,7 +63,7 @@ def scaffold(name: str, description: str, dest_parent: Path, source: Path) -> Pa
     if dest.exists():
         raise SystemExit(f"destination already exists, refusing to overwrite: {dest}")
 
-    shutil.copytree(source, dest, ignore=_ignored)
+    shutil.copytree(source, dest, ignore=_make_ignore(source.resolve()))
 
     # Verify the engine files landed byte-identical — if this ever fails, the
     # copy logic above is broken, not something to silently work around.

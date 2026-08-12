@@ -4,10 +4,12 @@ A cookie-cutter builder for LangGraph-style Claude Code plugins: stdlib-only sta
 execution where routing is enforced by deterministic code, not by prose instructions Claude
 may or may not follow.
 
-Two things ship here. **`skills/scaffold-graph-plugin/`** is the generator — it interrogates
-you for a complete graph spec, then produces a real plugin on top of this engine.
-**`/teacher`** is the worked example that proves the pattern end to end, and the file you'd
-copy by hand if you'd rather not use the generator.
+Two commands ship here:
+
+- **`/build-graph`** — the generator. Interrogates you for a complete graph spec, then
+  scaffolds and fills in a real plugin on top of this engine.
+- **`/teacher`** — the worked example that proves the pattern end to end, and the code you'd
+  copy by hand if you'd rather not use the generator.
 
 ## Structure
 
@@ -19,7 +21,12 @@ claudegraph/
 ├── .claude-plugin/
 │   └── plugin.json           # manifest (required)
 ├── commands/
-│   └── teacher.md            # /teacher — literal, numbered procedure that calls the script
+│   ├── build-graph.md        # /build-graph — GENERATOR: interrogates for the graph spec,
+│   │                          #   scaffolds, then fills in the new plugin's domain logic
+│   └── teacher.md            # /teacher — EXAMPLE: literal, numbered procedure calling the script
+├── references/
+│   └── graph-spec.md         # field schema the interrogation fills, worked example,
+│                              #   and how each field maps to code (read by /build-graph)
 ├── scripts/
 │   ├── graph.py               # generic engine: NodeKind, NodeMeta, State, Graph
 │   │                          #   (add_node/add_edge/add_conditional_edge/step/node_meta),
@@ -28,15 +35,12 @@ claudegraph/
 │   ├── skill_runner.py        # generic CLI driver: stdin/stdout JSON, boundary validation,
 │   │                          #   step-budget handling, checkpointing, evidence logging —
 │   │                          #   reused as-is by every skill, never edited per-skill
+│   ├── scaffold_plugin.py     # the mechanical half of /build-graph: copies the engine
+│   │                          #   byte-identically, renames files, excludes generator machinery
 │   ├── template_skill.py       # THE TEMPLATE — copy this file for a new skill. Only defines
 │   │                          #   SKILL_NAME, build_graph(), a router, and an on_transition
 │   │                          #   policy hook; everything else comes from skill_runner.py
 │   └── test_template_skill.py  # stdlib unittest, run: python3 -m unittest scripts.test_template_skill -v
-├── skills/
-│   └── scaffold-graph-plugin/ # meta-skill: generates a NEW plugin from this one — copies
-│       ├── SKILL.md            #   graph.py/skill_runner.py verbatim, renames the template
-│       └── scripts/            #   files, then guides filling in the new graph's domain logic
-│           └── scaffold_plugin.py
 ├── LEARNING_CHECKLIST.md     # design rationale from building this: problem / solution / context
 ├── ROADMAP.md                # ideas considered and deliberately deferred
 └── README.md

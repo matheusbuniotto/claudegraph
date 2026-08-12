@@ -2,9 +2,10 @@
 
 Cookie-cutter builder for LangGraph-style Claude Code plugins: a stdlib-only
 routing engine (`scripts/graph.py` + `scripts/skill_runner.py`), a generator
-skill (`skills/scaffold-graph-plugin/`) that interrogates for a graph spec and
-produces real plugins from it, and one worked example
-(`scripts/template_skill.py`) that both proves the pattern and serves as the
+command (`/build-graph`, backed by `scripts/scaffold_plugin.py` and
+`references/graph-spec.md`) that interrogates for a graph spec and produces real
+plugins from it, and one worked example command (`/teacher`, backed by
+`scripts/template_skill.py`) that both proves the pattern and serves as the
 hand-copy starting point. Full rationale lives in
 `README.md` (structure/install/customize), `ROADMAP.md` (ideas considered and
 deliberately deferred, with why), and `LEARNING_CHECKLIST.md` (the design
@@ -13,10 +14,14 @@ they already answer.
 
 ## Adding a skill or feature
 
-- New plugin built on this engine: use `skills/scaffold-graph-plugin/` — it
-  interrogates for the full graph spec first, which is the step that decides
-  output quality. Hand-copying `scripts/template_skill.py` per `README.md`'s
-  Customize section is the fallback, not the default.
+- New plugin built on this engine: use `/build-graph` — it interrogates for the
+  full graph spec first, which is the step that decides output quality.
+  Hand-copying `scripts/template_skill.py` per `README.md`'s Customize section
+  is the fallback, not the default.
+- Two commands only, by design: `/build-graph` (generator) and `/teacher`
+  (example). A third command needs a reason that isn't "it seemed useful" —
+  and generated plugins must never inherit `/build-graph` (see
+  `EXCLUDE_RELPATHS` in `scripts/scaffold_plugin.py`).
 - New skill inside this plugin: copy `scripts/template_skill.py`, follow
   `README.md`'s Customize section. Never edit `graph.py`/`skill_runner.py` to
   fit one skill's needs — they're skill-agnostic on purpose.

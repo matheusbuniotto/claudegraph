@@ -1,6 +1,6 @@
 ---
 name: teacher
-description: Teach a topic via a small state graph (explain -> demonstrate -> check, loops on misunderstanding).
+description: "Example run: teach a topic via a small state graph (explain -> demonstrate -> check, loops on misunderstanding)."
 ---
 
 Topic: $ARGUMENTS
