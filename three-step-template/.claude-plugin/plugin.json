@@ -1,0 +1,11 @@
+{
+  "name": "three-step-template",
+  "version": "1.0.0",
+  "description": "Cookie-cutter plugin template: a single command that walks through three steps (KISS).",
+  "author": {
+    "name": "Matheus Buniotto",
+    "email": "matheus.buniotto@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": ["template", "starter", "cookie-cutter"]
+}

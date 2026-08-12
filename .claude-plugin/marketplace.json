@@ -1,0 +1,15 @@
+{
+  "name": "matheus-local-plugins",
+  "description": "Local marketplace for developing and testing plugins before publishing.",
+  "owner": {
+    "name": "Matheus Buniotto",
+    "email": "matheus.buniotto@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "three-step-template",
+      "description": "Cookie-cutter plugin template: a single command that walks through three steps via a small state graph (KISS).",
+      "source": "./three-step-template"
+    }
+  ]
+}
