@@ -128,11 +128,24 @@ as a visible trace rather than undifferentiated prose:
 is composed in `skill_runner.py`, not by Claude — asking for a progress line each turn invites
 drift in wording and in what gets dropped; the only instruction is "print this".
 
+Alongside `banner`, every call also returns `preview`: the whole graph on one line, author
+order, with the node about to run bracketed —
+
+```
+explain → ▶[demonstrate] → check → end
+```
+
+Node order comes from the order `add_node()` was called in `build_graph()`, not a live
+traversal — a branch (a conditional edge, a retry loop) collapses onto whichever side was
+declared first. It's a fixed map for orientation ("where in the graph am I"), not a route
+of what will actually run next.
+
 The full graph state (`next_node`/`kind`/`goal`/`retry_count`/`step_count`/`done`) is already
-the script's entire stdout contract — JSON in, JSON out. `banner` is one more key in that same
-object: a plain-text projection of it for the human reading the terminal. There's no separate
-"print of graph state" to convert — the machine-readable form already exists, and turning the
-banner itself into JSON would just make the visible trace above harder to read for no gain.
+the script's entire stdout contract — JSON in, JSON out. `banner` and `preview` are two more
+keys in that same object: plain-text projections of it for the human reading the terminal.
+There's no separate "print of graph state" to convert — the machine-readable form already
+exists, and turning either one into JSON would just make the visible trace above harder to
+read for no gain.
 
 ## Runs, evidence, and artifacts
 

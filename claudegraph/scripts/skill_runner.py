@@ -11,8 +11,9 @@ CLI contract (stdin -> stdout, both JSON):
         "max_retries": 2, "step_count": 0, "max_steps": 50, "run_id": "...",
         "log_path": "...", "checkpoint_path": "...",
         "actions": [{"tool": "Read", "target": "spec.md"}]}  # all but current_node optional
-  out: {"next_node": "explain", "kind": "task", "goal": "...", "retry_count": 1,
-        "max_retries": 2, "step_count": 1, "run_id": "...", "done": false}
+  out: {"next_node": "explain", "kind": "task", "goal": "...", "banner": "...",
+        "preview": "...", "retry_count": 1, "max_retries": 2, "step_count": 1,
+        "run_id": "...", "done": false}
 
 `actions` is a log-only record of what the *previous* node actually did — tool
 calls made, sources retrieved — passed on the call that reports that node's
@@ -132,6 +133,7 @@ def run_skill(
                 "kind": kind,
                 "goal": goal,
                 "banner": _banner(next_node, kind, goal, state),
+                "preview": _preview(graph.nodes(), next_node, kind),
                 "retry_count": state.retry_count,
                 "max_retries": state.max_retries,
                 "step_count": state.step_count,
@@ -160,3 +162,15 @@ def _banner(node: str, kind: str | None, goal: str | None, state: State) -> str:
     marker = _MARKERS.get(kind or "", "▶")
     head = f"{marker} {node} ({', '.join(parts)})"
     return f"{head} — {goal}" if goal else head
+
+
+def _preview(node_order: list[str], current: str, kind: str | None) -> str:
+    """One line showing the whole graph with the node about to run highlighted.
+
+    Node order is the author's add_node() call order, not a live traversal —
+    branches (conditional edges, retry loops) collapse onto whichever side
+    was declared first. It's a fixed map for orientation, not a route.
+    """
+    marker = _MARKERS.get(kind or "", "▶")
+    parts = [f"{marker}[{n}]" if n == current else n for n in node_order]
+    return " → ".join(parts)

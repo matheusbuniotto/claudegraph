@@ -48,9 +48,12 @@ section). A parallel graph is a different, unbuilt foundation.
 ## Write the spec
 
 Write `./<plugin-name>.graph-spec.md` in the structured form shown in
-`references/graph-spec.md`'s worked example, then **show it to the user and get explicit
-confirmation.** The restatement is where mismatched assumptions surface cheaply — a spec the
-user skimmed is not a confirmed spec.
+`references/graph-spec.md`'s worked example — nodes, edges, loop policy, and an ASCII
+diagram of the topology (see that file's "Diagram" section for the format) placed right
+after the node list — then **show it to the user and get explicit confirmation.** The
+restatement is where mismatched assumptions surface cheaply — a spec the user skimmed is
+not a confirmed spec, and the diagram is what makes a branchy or looping topology
+skimmable instead of something they have to trace through prose.
 
 Close by telling them the file path and that `/build-graph <path>` implements it. They can
 edit the file by hand first; it is the source of truth from here.

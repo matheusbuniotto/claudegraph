@@ -18,6 +18,8 @@ You MUST follow this exact procedure. Do not skip the script call. Do not narrat
 3. **Print the `banner` field verbatim on its own line, before anything else**, so the user can
    see which node is running and why. It is preformatted — print it, don't rewrite or summarize
    it. Example: `▶ demonstrate (step 2) — one concrete example`
+   Then **print the `preview` field verbatim on the next line** — a one-line map of the whole
+   graph with the node about to run highlighted, e.g. `explain → ▶[demonstrate] → check → end`.
 4. Read `next_node`, `kind`, and `goal` from the output. Generate content matching that node's
    `goal`. If `kind` is `human_gate` (the `check` node), ask one question and wait for the user's
    answer before continuing — don't call the script again until they've responded.

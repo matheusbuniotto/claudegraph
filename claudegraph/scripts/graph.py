@@ -54,6 +54,7 @@ class Graph:
 
     def __init__(self) -> None:
         self._nodes: set[str] = set()
+        self._node_order: list[str] = []
         self._node_meta: dict[str, NodeMeta] = {}
         self._edges: dict[str, str] = {}
         self._conditional_edges: dict[str, Callable[[State], str]] = {}
@@ -66,8 +67,15 @@ class Graph:
         goal: str | None = None,
         agent: str | None = None,
     ) -> None:
+        if name not in self._nodes:
+            self._node_order.append(name)
         self._nodes.add(name)
         self._node_meta[name] = NodeMeta(name=name, kind=kind, goal=goal, agent=agent)
+
+    def nodes(self) -> list[str]:
+        """Node names in add_node() call order — the author's own flow order,
+        used to render a whole-graph preview rather than to route anything."""
+        return list(self._node_order)
 
     def add_edge(self, from_node: str, to_node: str) -> None:
         self._edges[from_node] = to_node

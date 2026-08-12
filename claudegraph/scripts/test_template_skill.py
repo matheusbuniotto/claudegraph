@@ -79,6 +79,24 @@ class TeacherSkillTests(unittest.TestCase):
         )
         self.assertIn("retry 1/2", looped["banner"])
 
+    def test_preview_shows_whole_graph_with_next_node_highlighted(self):
+        out = json.loads(self.run_skill({"current_node": "explain", "data": {}}).stdout)
+        preview = out["preview"]
+        self.assertEqual(preview, "explain → ▶[demonstrate] → check → end")
+
+    def test_preview_marker_matches_node_kind(self):
+        gate = json.loads(
+            self.run_skill({"current_node": "demonstrate", "data": {}}).stdout
+        )
+        self.assertIn("⏸[check]", gate["preview"])
+
+        end = json.loads(
+            self.run_skill(
+                {"current_node": "check", "data": {"understood": True}}
+            ).stdout
+        )
+        self.assertIn("■[end]", end["preview"])
+
     def test_check_node_exposes_human_gate_kind(self):
         result = self.run_skill(
             {

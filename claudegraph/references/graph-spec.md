@@ -69,6 +69,22 @@ Required whenever any router can return an earlier node:
 A loop without a stated termination is not a spec gap to fill in with a default — it's an
 answer still owed by the user. The engine's `max_steps` is a crash-guard, not a policy.
 
+## Diagram
+
+Every spec includes an ASCII diagram of the topology, placed right after the node list —
+readable directly in a terminal or a plain-text editor, no renderer required (this is why
+it's ASCII, not Mermaid: a fenced Mermaid block is inert text outside something that parses
+it, and the spec is meant to be reviewed on the spot, not exported). Use the same kind
+markers as the runtime `banner`/`preview` (`▶` task, `⏸` human_gate, `■` end) so the two
+stay visually consistent:
+
+- Plain edges: left-to-right chain joined by `→`.
+- A loop-back edge: draw it as a return arrow under the chain, labeled with the trigger
+  condition — not just "(retry)" restated, the actual condition from the loop policy.
+- A branching node (conditional edge with more than one destination): list each
+  `condition → destination` on its own line under that node rather than forcing multiple
+  outgoing arrows into one cramped line.
+
 ## Worked example — incident triage (non-teacher domain)
 
 ```
@@ -111,6 +127,16 @@ loop policy:
   trigger: engineer rejects the classification (data.confirmed False)
   termination: retry_count >= max_retries (default 2)
   increment: confirm_with_human -> classify counts as one retry
+```
+
+Diagram:
+
+```
+▶ classify → ▶ gather_evidence → ⏸ confirm_with_human
+     ▲                                  │
+     │                                  ├─ data.confirmed is True       → ■ end
+     │                                  ├─ retry_count >= max_retries   → ■ end
+     └───────────── otherwise (engineer rejects the classification) ───┘
 ```
 
 Maps to:

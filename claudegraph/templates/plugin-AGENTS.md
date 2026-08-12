@@ -16,7 +16,8 @@ A graph-executed plugin: `scripts/{{PY_STEM}}_skill.py` defines the node graph,
 - **`commands/{{NAME}}.md`** — a literal, numbered procedure. Keep it literal: prose
   like "follow the graph" is exactly the drift the engine exists to prevent. Keep the
   step that prints the script's `banner` field verbatim, so the user sees which node is
-  running and why.
+  running and why, and the step that prints `preview` verbatim, the one-line map of the
+  whole graph with that node highlighted.
 - **`scripts/test_{{PY_STEM}}_skill.py`** — every router branch and every loop
   termination needs a case. Those are the paths a wrong answer actually reaches.
 
