@@ -1,61 +1,46 @@
 # AGENTS.md
 
-Cookie-cutter builder for LangGraph-style Claude Code plugins: a stdlib-only
-routing engine (`scripts/graph.py` + `scripts/skill_runner.py`), a generator
-pair of generator commands — `/graph-spec` (interrogate, write a spec file) and
-`/build-graph` (implement it, backed by `scripts/scaffold_plugin.py`,
-`references/graph-spec.md`, and `templates/`) — and one worked example command
-(`/teacher`, backed by `scripts/template_skill.py`) that both proves the pattern
-and serves as the hand-copy starting point. Full rationale lives in
-`README.md` (structure/install/customize), `ROADMAP.md` (ideas considered and
-deliberately deferred, with why), and `LEARNING_CHECKLIST.md` (the design
-decisions behind the current shape). Read those before re-deriving anything
-they already answer.
+`claudegraph` is a Claude Code plugin for LangGraph-style workflows. A stdlib-only engine
+(`scripts/graph.py` + `scripts/skill_runner.py`) decides routing. Commands are literal
+procedures that call a skill script after every step. See `README.md` for the model.
 
-## Adding a skill or feature
+## Where code belongs
 
-- New plugin built on this engine: use `/graph-spec` then `/build-graph`. The
-  spec step decides output quality; keep it a separate turn producing a real
-  file, never folded into implementation. Hand-copying
-  `scripts/template_skill.py` per `README.md`'s Customize section is the
-  fallback, not the default.
-- Three commands, by design: `/graph-spec` (plan), `/build-graph` (implement),
-  `/teacher` (example). A fourth needs a reason that isn't "it seemed useful",
-  and generated plugins must never inherit the generator's commands, templates,
-  or references (see `EXCLUDE_RELPATHS` in `scripts/scaffold_plugin.py`).
-- Agent/skill/MCP attachments are opt-in per node against the rules in
-  `references/graph-spec.md`. A generated plugin where every node has all three
-  is a failure of that judgment, not thoroughness.
-- New skill inside this plugin: copy `scripts/template_skill.py`, follow
-  `README.md`'s Customize section. Never edit `graph.py`/`skill_runner.py` to
-  fit one skill's needs — they're skill-agnostic on purpose.
-- New engine capability (`graph.py`/`skill_runner.py`): add it once a real,
-  proven caller needs it, not because it might be useful later. Every YAGNI
-  call already made is logged in `ROADMAP.md` — check it before
-  re-litigating the same idea from scratch.
-- Stdlib only. No new dependency without first checking `ROADMAP.md`'s
-  reasoning on why this stays pip-install-free.
-- One meaning, one place. If a fact already lives in `README.md`/`ROADMAP.md`/
-  the code itself, point to it instead of restating it in a new doc or comment.
-- Skill-agnostic logic goes in `graph.py`; driver/CLI plumbing goes in
-  `skill_runner.py`; everything skill-specific stays in the skill's own file.
-  Misplacing new code across this boundary is the most common way this
-  template rots.
+- **`scripts/graph.py`**: skill-agnostic engine logic only.
+- **`scripts/skill_runner.py`**: CLI plumbing shared by every skill (stdin/stdout JSON,
+  validation, logging, checkpoints, banner).
+- **`scripts/<name>_skill.py`**: everything specific to one skill: nodes, edges, routers,
+  `on_transition` policy.
+- **`commands/<name>.md`**: a literal numbered procedure. Prose like "follow the graph"
+  is the drift this project exists to prevent.
 
-## Guardrails — flag risk before implementing
+Never edit `graph.py` or `skill_runner.py` to fit one skill. Add an engine capability
+only when a real caller needs it.
 
-Surface the tradeoff to the user, with a smaller alternative, before building
-a request that would: add a third-party dependency; add concurrency/parallel
-execution (the DAG-scheduler idea in `ROADMAP.md` is real but is its own
-project, not an addition here); weaken or remove boundary validation
-(malformed-input handling, the step budget); generalize from a single
-example before a second real caller exists; or change the CLI contract
-`skill_runner.py` promises (stdin/stdout JSON shape) without updating every
-consumer and the tests. State the risk plainly, the way this project's own
-history already does in `ROADMAP.md`, and let the user decide with that in
-view — agreement without that context is the risk, not the pushback.
+## Rules
 
-Every change ships with passing tests
-(`python3 -m unittest scripts.test_template_skill -v` from `claudegraph/`)
-and, if behavior changed, an updated `README.md`/`ROADMAP.md` — a stale doc
-here is worse than no doc.
+- **Stdlib only.** The plugin must run wherever it is installed, with no pip install.
+- **Three commands.** `/graph-spec` plans, `/build-graph` implements, `/teacher` is the
+  example. A fourth needs a concrete reason.
+- **Generated plugins stay clean.** They must not inherit the generator's commands,
+  templates, or references. `EXCLUDE_RELPATHS` in `scripts/scaffold_plugin.py` enforces
+  this, and `scripts/test_scaffold_plugin.py` checks it.
+- **Attachments are opt-in per node.** Follow the rules in `references/graph-spec.md`. A
+  plugin where every node has an agent, a skill, and an MCP server is a design failure.
+
+## Flag before building
+
+Raise the tradeoff and a smaller alternative before any change that would:
+
+- add a third-party dependency;
+- add parallel execution, which belongs in `../airbend`, not here;
+- weaken input validation or the step budget;
+- change the `skill_runner.py` JSON contract without updating every command and test.
+
+## Every change ships with
+
+```
+python3 -m unittest discover -s scripts -p "test_*.py"
+```
+
+passing, and `README.md` updated if behavior changed.

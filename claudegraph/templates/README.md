@@ -17,10 +17,9 @@ This directory is excluded from generated plugins (`EXCLUDE_RELPATHS` in
 
 `plugin-README.md` and `plugin-AGENTS.md` are rendered by the scaffold script with
 `{{NAME}}`/`{{DESCRIPTION}}`/`{{PY_STEM}}` substituted — they exist so a generated plugin
-documents *itself* rather than inheriting claudegraph's README, AGENTS, and ROADMAP. That
-inheritance was a real bug: generated plugins shipped with claudegraph's deferred-ideas
-backlog and rules about commands they don't have. `scripts/test_scaffold_plugin.py` now
-fails if any claudegraph identity leaks into a scaffolded plugin.
+documents *itself* rather than inheriting claudegraph's README and AGENTS.
+`scripts/test_scaffold_plugin.py` fails if any claudegraph identity leaks into a
+scaffolded plugin.
 
 `mcp.json` is stored without the leading dot on purpose: a real `.mcp.json` sitting in the
 plugin would be auto-loaded and its placeholder server would fail to start. Rename it on

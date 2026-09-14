@@ -23,16 +23,12 @@ from pathlib import Path
 # This script lives at <plugin-root>/scripts/scaffold_plugin.py
 DEFAULT_SOURCE = Path(__file__).resolve().parents[1]
 
-# Not copied: .git internals, caches, and claudegraph's own design history.
-# LEARNING_CHECKLIST.md and ROADMAP.md record decisions and deferrals made while
-# building claudegraph — a fresh plugin has neither, and inheriting them ships a
-# new project with someone else's backlog.
+# Not copied: VCS internals, caches, and local run artifacts.
 EXCLUDE_NAMES = {
-    "LEARNING_CHECKLIST.md",
-    "ROADMAP.md",
     "__pycache__",
     ".git",
     ".ruff_cache",
+    "runs",
 }
 
 # Rendered fresh from templates/ rather than copied, so the generated plugin

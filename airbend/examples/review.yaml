@@ -1,0 +1,29 @@
+# Agent graph. Each `agent` node runs Claude Code headless (`claude -p`) or Codex.
+# Requires an agent CLI on PATH.
+id: review
+version: 1
+nodes:
+  - id: diff
+    executor: { type: command, cmd: "git log -1 --patch --stat" }
+
+  - id: review
+    executor:
+      type: agent
+      permission_mode: plan
+      task: >-
+        Goal: {{goal}}.
+        Review this change for bugs and risky patterns. Write your findings to the
+        `findings` channel as a list of strings.
+        Change:
+        {{channels.diff}}
+    depends_on: [diff]
+    timeout: 900
+    routes:
+      failure: interrupt   # pause for a human instead of failing the run
+
+  - id: summarize
+    executor:
+      type: agent
+      permission_mode: plan
+      task: "Summarize these review findings in three bullets: {{channels.findings}}"
+    depends_on: [review]

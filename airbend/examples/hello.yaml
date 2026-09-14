@@ -1,0 +1,28 @@
+# Command-only graph. Runs anywhere, no agent CLI required.
+# Shows dependencies, retries, data passing through channels, and failure routing.
+id: hello
+version: 1
+nodes:
+  - id: fetch
+    executor: { type: command, cmd: "printf '{\"message\": \"hello from fetch\"}'" }
+
+  - id: check
+    # Reads the upstream `message` channel from the context file airbend passes in.
+    executor:
+      type: command
+      cmd: >-
+        python3 -c "import json, os;
+        ctx = json.load(open(os.environ['AIRBEND_CTX_FILE']));
+        assert ctx['channels']['message'].startswith('hello');
+        print(json.dumps({'checked': True}))"
+    depends_on: [fetch]
+    retries: 1
+    routes:
+      success: report
+      failure: triage
+
+  - id: triage
+    executor: { type: command, cmd: "echo 'check failed, triaging'" }
+
+  - id: report
+    executor: { type: command, cmd: "echo 'all checks passed'" }

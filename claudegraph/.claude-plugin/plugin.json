@@ -1,7 +1,7 @@
 {
   "name": "claudegraph",
   "version": "1.0.0",
-  "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
+  "description": "LangGraph-style workflows for Claude Code: a stdlib-only state-graph engine that enforces routing, plus commands to spec and build graph-driven plugins.",
   "author": {
     "name": "Matheus Buniotto",
     "email": "matheus.buniotto@gmail.com"
@@ -9,5 +9,11 @@
   "homepage": "https://github.com/matheusbuniotto/claudegraph",
   "repository": "https://github.com/matheusbuniotto/claudegraph",
   "license": "MIT",
-  "keywords": ["template", "starter", "cookie-cutter", "langgraph", "state-graph", "scaffold"]
+  "keywords": [
+    "langgraph",
+    "state-graph",
+    "workflow",
+    "orchestration",
+    "scaffold"
+  ]
 }

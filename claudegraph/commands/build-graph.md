@@ -43,8 +43,9 @@ The generated plugin's `README.md` "Customize" section holds the exact shape eac
 Fill in from the spec:
 
 - `scripts/<name>_skill.py` — `SKILL_NAME`, `build_graph()`, router(s), `on_transition()`
-- `commands/<name>.md` — a literal numbered procedure, not abstract prose (see
-  `${CLAUDE_PLUGIN_ROOT}/LEARNING_CHECKLIST.md` on why that distinction carries the enforcement).
+- `commands/<name>.md` — a literal numbered procedure, not abstract prose. Abstract
+  instructions like "follow the graph" are exactly where Claude drifts; the literal
+  steps are what carry the enforcement.
   Keep the inherited step that prints the script's `banner` field verbatim — that line is how
   the user sees which node is running and why — and the step that prints `preview` verbatim,
   the one-line map of the whole graph with that node highlighted. Both cost nothing to preserve.

@@ -19,8 +19,6 @@ LEAK_PATTERNS = (
     "teacher",
     "build-graph",
     "graph-spec",
-    "LEARNING_CHECKLIST",
-    "ROADMAP",
     "template_skill",
 )
 
@@ -70,12 +68,6 @@ class ScaffoldTests(unittest.TestCase):
             offenders, [], "leaked claudegraph internals:\n" + "\n".join(offenders)
         )
 
-    def test_design_history_files_not_copied(self):
-        for name in ("ROADMAP.md", "LEARNING_CHECKLIST.md"):
-            self.assertFalse(
-                (self.plugin / name).exists(), f"{name} should not be copied"
-            )
-
     def test_generator_machinery_not_copied(self):
         for rel in (
             "scripts/scaffold_plugin.py",
@@ -83,6 +75,7 @@ class ScaffoldTests(unittest.TestCase):
             "commands/graph-spec.md",
             "references",
             "templates",
+            "runs",
         ):
             self.assertFalse(
                 (self.plugin / rel).exists(), f"{rel} should not be copied"

@@ -42,8 +42,8 @@ Ask in this order, in small batches rather than one overwhelming block:
    `retry_count`/`step_count` are already logged).
 
 Stop and flag, rather than designing around it, if the request needs concurrent branches:
-this engine is single-active-node (see `${CLAUDE_PLUGIN_ROOT}/ROADMAP.md`'s Terraform/DAG
-section). A parallel graph is a different, unbuilt foundation.
+this engine is single-active-node. Parallel or unattended pipelines belong in airbend,
+the DAG runtime that ships alongside this plugin, not in a graph built here.
 
 ## Write the spec
 

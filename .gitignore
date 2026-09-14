@@ -1,5 +1,18 @@
+# Python
 __pycache__/
 *.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+
+# claudegraph run artifacts
+runs/
 *.log.jsonl
 *.checkpoint.json
-runs/
+
+# airbend local state
+.airbend/
+*.db

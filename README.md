@@ -1,36 +1,59 @@
 # claudegraph
 
-A Claude Code plugin for creating LangGraph-style plugins.
+Graph-based execution for Claude Code, in the style of LangGraph and Airflow.
 
-Claude following a numbered list in a markdown command file is *advisory*! Nothing stops it
-from skipping a step, merging two, or narrating work it never did. `claudegraph` moves the
-routing into deterministic, stdlib-only Python: a small state-graph engine decides what happens
-next, and Claude generates the content for whatever node it's told it's on.
+Instructions in a markdown command are advisory. Claude can skip a step, merge two, or
+report work it never did. This repo moves control flow out of prose and into code: a
+deterministic engine decides which node runs next, and Claude only does the work for the
+node it is on.
 
-## What's in here
+It ships two independent components that solve this at different levels.
 
-- **`claudegraph/`** — the plugin. Three commands, deliberately:
-  - **`/graph-spec`** — interrogates you for the plan (per node: kind, goal, tools, expected
-    output, logging; per edge: exact conditions and destinations; per loop: trigger and
-    termination) and writes it to a reviewable, hand-editable spec file. No code.
-  - **`/build-graph`** — implements that spec: scaffolds, writes the domain logic, verifies.
-    Generates a subagent, skill, or MCP config for a node only when that node warrants one.
-  - **`/teacher`** — the example run that proves the pattern end to end.
-  - **`scripts/graph.py` + `scripts/skill_runner.py`** — the engine underneath both. Nodes,
-    edges, conditional edges, a step budget, checkpointing, and an append-only evidence log.
-    No dependencies.
+| Component | Model | Runs where | Dependencies |
+|---|---|---|---|
+| [`claudegraph/`](claudegraph/) | LangGraph-style state machine: one active node, conditional edges, bounded loops, human gates | Inside an interactive Claude Code session, as a plugin | None (stdlib) |
+| [`airbend/`](airbend/) | Airflow-style DAG runtime: durable runs, retries, failure routing, interrupt/resume, cron | Outside the session, as a CLI that calls `claude -p` per node | PyYAML |
 
-## Install
+## Which one to use
+
+- **Use `claudegraph`** when a human is in the loop and the workflow lives in a
+  conversation: tutoring, triage, guided reviews. Routing is enforced per step, and every
+  transition is logged.
+- **Use `airbend`** when the workflow should run unattended: pipelines that mix shell,
+  Python, HTTP, and agent steps, need retries and a persistent run history, or fire on a
+  schedule.
+
+## Quick start
+
+**claudegraph** (Claude Code plugin):
 
 ```
 /plugin marketplace add matheusbuniotto/claudegraph
 /plugin install claudegraph@claudegraph
+/teacher recursion
 ```
 
-Then run `/teacher <topic>` to see the pattern, or ask Claude to scaffold a new graph-based
-plugin to use the generator.
+**airbend** (CLI):
 
-## Limitations
-Known limitations are stated plainly in `claudegraph/README.md` — most importantly that this
-shrinks the "Claude might not follow instructions" problem rather than eliminating it, and that
-the engine is single-active-node, not a parallel DAG scheduler.
+```
+cd airbend
+uv sync
+uv run airbend dag register examples/hello.yaml
+uv run airbend run start hello --watch
+```
+
+See each component's README for the full model, configuration, and limitations.
+
+## Development
+
+```
+# claudegraph: stdlib unittest
+cd claudegraph && python3 -m unittest discover -s scripts -p "test_*.py"
+
+# airbend: pytest + ruff
+cd airbend && uv run pytest && uv run ruff check .
+```
+
+## License
+
+MIT

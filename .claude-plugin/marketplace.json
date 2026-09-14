@@ -1,6 +1,6 @@
 {
   "name": "claudegraph",
-  "description": "Marketplace for claudegraph — a Claude Code plugin for building LangGraph-style plugins.",
+  "description": "Marketplace for claudegraph: LangGraph-style workflows for Claude Code.",
   "owner": {
     "name": "Matheus Buniotto",
     "email": "matheus.buniotto@gmail.com"
@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "claudegraph",
-      "description": "Cookie-cutter builder for LangGraph-style plugins: a stdlib-only state-graph engine, a generator skill that interrogates you for the graph spec, and a worked example command.",
+      "description": "LangGraph-style workflows for Claude Code: a stdlib-only state-graph engine that enforces routing, plus commands to spec and build graph-driven plugins.",
       "source": "./claudegraph"
     }
   ]
