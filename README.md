@@ -7,21 +7,17 @@ report work it never did. This repo moves control flow out of prose and into cod
 deterministic engine decides which node runs next, and Claude only does the work for the
 node it is on.
 
-It ships two independent components that solve this at different levels.
+Two independent tools, no shared code. Pick by where the workflow runs:
 
-| Component | Model | Runs where | Dependencies |
-|---|---|---|---|
-| [`claudegraph/`](claudegraph/) | LangGraph-style state machine: one active node, conditional edges, bounded loops, human gates | Inside an interactive Claude Code session, as a plugin | None (stdlib) |
-| [`airbend/`](airbend/) | Airflow-style DAG runtime: durable runs, retries, failure routing, interrupt/resume, cron | Outside the session, as a CLI that calls `claude -p` per node | PyYAML |
-
-## Which one to use
-
-- **Use `claudegraph`** when a human is in the loop and the workflow lives in a
-  conversation: tutoring, triage, guided reviews. Routing is enforced per step, and every
-  transition is logged.
-- **Use `airbend`** when the workflow should run unattended: pipelines that mix shell,
-  Python, HTTP, and agent steps, need retries and a persistent run history, or fire on a
-  schedule.
+| | `claudegraph/` | `airbend/` |
+|---|---|---|
+| Style | LangGraph: state machine, one active node | Airflow: DAG runtime, durable runs |
+| Runs | Inside your Claude Code session (plugin) | Outside it (CLI calling `claude -p` per node) |
+| Human in the loop | Yes, per step | Via interrupt / resume |
+| Loops | Yes, bounded | No, retries only |
+| State | JSON files per run | SQLite |
+| Use for | Guided, conversational flows | Unattended pipelines, cron, retries |
+| Deps | None | PyYAML |
 
 ## Quick start
 
